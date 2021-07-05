@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-const prefix =  "Hello, world "
+const prefix = "Hello, world "
 
 // 	AddEmoji prints `Hello, world ` with an added emoji symbol
 func AddEmoji(symbol string, w func(a ...interface{}) (n int, err error)) int {
