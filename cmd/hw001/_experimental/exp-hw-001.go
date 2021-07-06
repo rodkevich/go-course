@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	helloWorldPrinter "github.com/rodkevich/go-course/homework/task001/hwp"
+	helloWorldPrinter "github.com/rodkevich/go-course/homework/hw001/hwp"
 )
 
 func main() {
