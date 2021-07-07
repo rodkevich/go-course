@@ -1,4 +1,4 @@
-package hwp
+package helloWorldPrinter
 
 import (
 	"fmt"
