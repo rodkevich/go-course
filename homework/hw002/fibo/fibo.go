@@ -4,13 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"os"
 )
 
 //errors
 var (
-	errorWrongUserInput error = errors.New(
-		"\nmax 64bit `size` is 93. \nExiting app: wrong number was provided",
+	errorLimitOf64bitSeq error = errors.New(
+		"\nmax 64bit `size` is 93. \nXX Exiting app: wrong number was provided XX",
 	)
 )
 
@@ -20,45 +19,38 @@ const (
 	maxInt64        int64 = math.MaxInt64
 )
 
-//AppExit exit app with error print on wrong use
-func AppExit(code int, s string) {
-	fmt.Println(s)
-	os.Exit(code)
-}
-
-//Solution  prints a sequence of fibonacci numbers up to required length
-func Solution(n int) {
-	fmt.Println("Solution part started...")
+//Solution prints a sequence of fibonacci numbers up to required length
+func Solution(n int) error {
+	fmt.Println("Solution part started >>")
+	defer fmt.Println("<< Solution part ended")
 	var sequence, err = SizedSequence64bit(int64(n))
 	if err != nil {
-		AppExit(1, err.Error())
+		return err
 	}
 	fmt.Println("Result:")
 	fmt.Println(sequence)
+	return nil
 }
 
 // SizedSequence64bit returns a new slice of fibonacci numbers
 //with required length if possible. Breaks on 64 bit overflow
 func SizedSequence64bit(size int64) ([]int64, error) {
-	defer fmt.Println("\nCounting fresh sequence part finished")
-
+	defer fmt.Println("\nCounted fresh sequence part")
 	var (
 		counted int64
 		a       int64   = 0
 		b       int64   = 1
 		rtn     []int64 = []int64{a, b} // init with first two
 	)
-
 	// check input arg to be expected.if not -> return
 	if size > limitOf64bitSeq {
 		// TODO: почитать про nil
 		// TODO: почитать type assertion
-		return nil, errorWrongUserInput
+		return nil, errorLimitOf64bitSeq
 	}
 	for i := int64(2); i <= size; i++ {
 		counted = a + b
 		// check if max value reached
-
 		if counted > maxInt64 {
 			size = i
 			break
@@ -68,41 +60,36 @@ func SizedSequence64bit(size int64) ([]int64, error) {
 			rtn = append(rtn, counted)
 		}
 	}
-
 	return rtn[0:size], nil
 }
 
-//☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣
-////////////////////  Experimental   ///////////////////////
-////////////////////      part       ///////////////////////
-//☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣
+//////////////////  Experimental   /////////////////////
+//////////////////      part       /////////////////////
+//☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣
 
-// Cache to play with custom types
+// Cache custom type to play with
 type Cache []int64
 
-// NewCache ...
+// NewCache function returns prepared cache with first two numbers
 func NewCache() Cache {
 	return Cache{0: 0, 1: 1}
 }
 
-// SizedSequence64bitUsingCache uses cache or returns a new slice of fibonacci numbers
-//with required length if possible. Breaks on 64 bit overflow
-
-
-func PrintSequenceUsingCache(n int64, cache *Cache) []int64 {
-	var sequence, err = SizedSequence64bitUsingCache(n, cache)
+func SequenceWithCaching(n int64, cache *Cache) error {
+	var sequence, err = SizedSequence64bitWithCache(n, cache)
 	if err != nil {
-		AppExit(1, err.Error())
+		return err
 	}
 	fmt.Println("Result:")
 	fmt.Println(sequence)
-	return sequence
+	return nil
 }
 
-func SizedSequence64bitUsingCache(size int64, cache *Cache) ([]int64, error) {
-	s64 := SizedSequence64bit
+// SizedSequence64bitWithCache uses cache or returns a new slice of fibonacci numbers
+//with required length if possible. Breaks on 64 bit overflow
+func SizedSequence64bitWithCache(size int64, cache *Cache) ([]int64, error) {
 	if size > int64(len(*cache)) { // convert type to be comparable
-		out, err := s64(size)
+		out, err := SizedSequence64bit(size)
 		if err != nil {
 			return nil, err
 		}
