@@ -4,6 +4,10 @@ go-run-homework-001:
 go-run-homework-001-exp:
 	go run ./cmd/hw001/_experimental/exp-hw-001.go
 
+go-run-homework-002:
+	go run ./cmd/hw002/solution-hw-002.go
+
+
 go-run-homework-001-bench1:
 	cd ./homework/hw001/hwp; \
 	go test -run=BenchmarkAddEmoji1 -bench=. -benchtime=100000x -benchmem

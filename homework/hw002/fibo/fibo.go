@@ -6,47 +6,85 @@ import (
 	"math"
 )
 
-const (
-	limit64bitSeqSize int64 = 93
+//errors
+var (
+	errorWrongUserInput error = errors.New(
+		"\nmax 64bit `size` is 93. \nExiting app because wrong input was provided",
+	)
 )
 
-// SizedSequence64bit returns a new slice of fibonacci numbers with required length if possible. Breaks on 64 bit overflow
+//limits
+const (
+	limitOf64bitSeq int64 = 93
+	maxInt64        int64 = math.MaxInt64
+)
+
+// SizedSequence64bit returns a new slice of fibonacci numbers
+//with required length if possible. Breaks on 64 bit overflow
 func SizedSequence64bit(size int64) ([]int64, error) {
-	defer fmt.Println("Program stopped")
-	// set vars for use in function scope
+	defer fmt.Println("\nCounting fresh sequence part finished")
+
 	var (
-		a, b int64 = 0, 1
-		rtn        = []int64{a, b}
-		err        = errors.New("\nmax 64bit `size` is 93. exit app because wrong input")
+		counted int64
+		a       int64   = 0
+		b       int64   = 1
+		rtn     []int64 = []int64{a, b} // init with first two
 	)
-	// check if overflow can happen
-	if size > limit64bitSeqSize {
-		// TODO: почитать про nil (возвращается []int64. Хак?)
-		return nil, err
+
+	// check input arg to be expected.if not -> return
+	if size > limitOf64bitSeq {
+		// TODO: почитать про nil
+		// TODO: почитать type assertion
+		return nil, errorWrongUserInput
 	}
 	for i := int64(2); i <= size; i++ {
-		var c int64 = a + b
-		if c > math.MaxInt64 {
+		counted = a + b
+		// check if max value reached
+
+		if counted > maxInt64 {
 			size = i
 			break
 		} else {
-			a, b = b, c
-			rtn = append(rtn, c)
+			//prepare vars for new iteration
+			a, b = b, counted
+			rtn = append(rtn, counted)
 		}
 	}
+
 	return rtn[0:size], nil
 }
 
-// Cache ...
-type Cache map[int]int
+//☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣
+////////////////////  Experimental   ///////////////////////
+////////////////////      part       ///////////////////////
+//☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣☣
+
+// Cache to play with custom types
+type Cache []int64
 
 // NewCache ...
-func (c *Cache) NewCache() *Cache {
-	rtn := &Cache{0: 1, 1: 1}
-	return rtn
+func NewCache() Cache {
+	return Cache{0: 0, 1: 1}
 }
 
-// Experimental ...
-type Experimental interface {
-	NewCache() *Cache
+// SizedSequence64bitUsingCache uses cache or returns a new slice of fibonacci numbers
+//with required length if possible. Breaks on 64 bit overflow
+func SizedSequence64bitUsingCache(size int64, cache *Cache) ([]int64, error) {
+	s64 := SizedSequence64bit
+	if size > int64(len(*cache)) { // convert type to be comparable
+		out, err := s64(size)
+		if err != nil {
+			return nil, err
+		}
+		*cache = out
+		return out, err
+	} else {
+		fmt.Println("\nUsing cache")
+		var cachedArray []int64
+		for _, v := range *cache {
+			cachedArray = append(cachedArray, v)
+		}
+		newObject := cachedArray[0:size]
+		return newObject, nil
+	}
 }
