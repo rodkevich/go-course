@@ -17,6 +17,7 @@ Create more than one printer function for the Fibonacci function. And use them i
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/rodkevich/go-course/homework/hw002/fibo"
 	"os"
@@ -41,6 +42,8 @@ func hwPrinterSolution(n int) {
 
 func main() {
 	defer fmt.Println("\n...Main program exited")
+	experimentalPart := flag.Bool("e", false, "Run with experiments")
+	flag.Parse()
 	var n int
 	fmt.Print("Enter an integer between 1 - 93: \n")
 	_, err := fmt.Scanln(&n) // get input value into n var
@@ -49,8 +52,11 @@ func main() {
 	}
 	//Solution part
 	hwPrinterSolution(n)
+
 	//Experimental part
-	hwOptionalExperiments(n)
+	if *experimentalPart  {
+		hwOptionalExperiments(n)
+	}
 }
 
 // hwPrinterSolution(n) output for n = 25:
