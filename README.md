@@ -1,10 +1,15 @@
 ## Repo for 2021 Go course
 
-U can use Makefile from the project root to execute apps.  
+Use of Makefile:   
+run `make` from the project root to execute recipes
 
-Homework syntax is like go-run-homework-{HW_TASK_NUMBER}:  
-`make go-run-homework-001`  
+Homework syntax is like go-run-homework:  
+`make go-run-homework`
+
+For optional code:  
+`go-run-homework-optional:`
 
 For experimental code:  
-`make go-run-homework-001-exp`
+`go-run-homework-exp` 
 
+Then: input number of lesson for example `002`
