@@ -77,12 +77,12 @@ func sizedSequence64bit(size int64) ([]int64, error) {
 		// TODO: почитать type assertion
 		return nil, errorLimitOf64bitSeq
 	}
-	for iterator := int64(2); iterator <= size; iterator++ {
+	for i := int64(2); i <= size; i++ {
 		counted = a + b
 		//experimental checkEnv if max value reached because input is already validated
 		if counted < 0 {
-			fmt.Printf("! Warn: 64 bit overflow on %d iteration", iterator+1)
-			size = iterator
+			fmt.Printf("! Warn: 64 bit overflow on %d iteration", i+1)
+			size = i
 			break
 		} else {
 			//prepare vars for new iteration
