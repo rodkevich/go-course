@@ -7,7 +7,7 @@ Homework syntax is like go-run-homework:
 `make go-run-homework`
 
 For optional code:  
-`go-run-homework-optional:`
+`go-run-homework-optional`
 
 For experimental code:  
 `go-run-homework-exp` 
