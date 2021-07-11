@@ -28,7 +28,7 @@ var (
 	err error
 )
 
-//handleError
+//handleError function to handle app exit on errors
 // TODO: разобраться когда нужно/не нужно выходить с 1 а то чет наобум
 func handleError(exitCode int, err error) {
 	if err != nil {
@@ -39,59 +39,62 @@ func handleError(exitCode int, err error) {
 
 //init before running main()
 //set env var defining a printer to be used
-//presented: [ long, short - now FAKE UNIMPLEMENTED ]
+//presented: [ long, short - which is now set as FAKE UNIMPLEMENTED ]
 //short can be set to true in fibo.go: var `allowedPrinters`
 func init() {
 	defer fmt.Println("setup: Solution-app initialized")
 
 	err = os.Setenv("Printer", "long")
-	if err != nil {
-		handleError(1, err)
-	}
+	handleError(1, err)
 }
 
 func main() {
 
 	defer fmt.Println("\n<< Main program exited")
-	experimentalPart := flag.Bool("o", false, "Run with optional solution")
+	optionalPart := flag.Bool("o", false, "Run with optional solution")
 	flag.Parse()
 	var n int
 	fmt.Print("Enter an integer between 1 - 93: \n")
 	_, err = fmt.Scanln(&n) // get input value into n var
 	handleError(1, err)     // make app exit with 1 exit code if err not nil
-	//Solution part
+
+	//////////////////    Solution     /////////////////////
+	//////////////////      part       /////////////////////
 	fmt.Println("\n| Solution part started |")
 	handleError(0, fibo.Solution(n))
 
 	/*
-	!!  Printer "short" is experimentally set to "false" in fibo.go: var allowedPrinters !!!
-	So ... by default output will be ... :arrow_down:
+		!!  Printer "short" is experimentally set to "false" in fibo.go: var allowedPrinters !!!
+		So ... by default output will be ... :arrow_down:
 
-	Solution(n) output for n = 93 [printer = "short"]:
+		Solution(n) output for n = 93 [printer = "short"]:
 
-	setup: Fibonacci-app initialized
-	setup: Solution-app initialized
-	Enter an integer between 1 - 93:
-	93
+		setup: Fibonacci-app initialized
+		setup: Solution-app initialized
+		Enter an integer between 1 - 93:
+		93
 
-	| Solution part started |
-	! Warn: 64 bit overflow on 94 iteration
-	> Required sequence part counted
-	> Fibonacci-env check finished
-	! Using notAllowed printer:
-	! Selected printer is not implemented
-	<< Solution part ended
+		| Solution part started |
 
-	Abort app: implementation is not there yet. See ya!
+		> Input check
+		! Warn: 64 bit overflow on 94 iteration
+		> Required sequence part counted
+		> Fibonacci-env check finished
+		> Using notAllowed printer:
+		! Selected printer is not implemented
+		<< Solution part ended
 
-	Process finished with exit code 0
+		Abort app: implementation is not there yet. See ya!
+
+		Process finished with exit code 0
+
 	*/
 
 	//////////////////  Experimental   /////////////////////
 	//////////////////      part       /////////////////////
-	if *experimentalPart {
-		fmt.Println("\n| Experimental part started |")
-		defer fmt.Println("<< Experimental part ended")
+	if *optionalPart {
+		fmt.Println("\n| Optional part started |")
+		defer fmt.Println("<< Optional part ended")
 		// create a cache to be used for returns of previously counted numbers
 		cache := fibo.NewCache()
 		// run functions to use / not use cache
@@ -102,52 +105,57 @@ func main() {
 		handleError(0, fibo.OptionalSolutionWithCaching(17, &cache))
 
 		/*
-		Solution(n) +  OptionalSolutionWithCaching(n) output for n = 5 [printer = "long"]:
+			Solution(n) +  OptionalSolutionWithCaching(n) output for n = 5 [printer = "long"]:
 
-		setup: Fibonacci-app initialized
-		setup: Solution-app initialized
-		Enter an integer between 1 - 93:
-		5
+			setup: Fibonacci-app initialized
+			setup: Solution-app initialized
+			Enter an integer between 1 - 93:
+			5
 
-		| Solution part started |
+			| Solution part started |
 
-		> Required sequence part counted
-		> Fibonacci-env check finished
-		! Using long printer:
-		length=5 capacity=8 Result: [0 1 1 2 3]
-		<< Solution part ended
+			> Input check
+			> Required sequence part counted
+			> Fibonacci-env check finished
+			> Using long printer:
+			length=5 capacity=8 Result: [0 1 1 2 3]
+			<< Solution part ended
 
-		| Experimental part started |
+			| Optional part started |
 
-		> Required sequence part counted
-		> Fibonacci-env check finished
-		! Using long printer:
-		length=5 capacity=8 Result: [0 1 1 2 3]
+			> Input check
+			> Required sequence part counted
+			> Fibonacci-env check finished
+			> Using long printer:
+			length=5 capacity=8 Result: [0 1 1 2 3]
 
-		> Required sequence part counted
-		> Fibonacci-env check finished
-		! Using long printer:
-		length=7 capacity=8 Result: [0 1 1 2 3 5 8]
+			> Input check
+			> Required sequence part counted
+			> Fibonacci-env check finished
+			> Using long printer:
+			length=7 capacity=8 Result: [0 1 1 2 3 5 8]
 
-		* [Using cache]
-		> Fibonacci-env check finished
-		! Using long printer:
-		length=7 capacity=8 Result: [0 1 1 2 3 5 8]
+			* [Using cache]
+			> Fibonacci-env check finished
+			> Using long printer:
+			length=4 capacity=8 Result: [0 1 1 2]
 
-		> Required sequence part counted
-		> Fibonacci-env check finished
-		! Using long printer:
-		length=20 capacity=32 Result: [0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987 1597 2584 4181]
+			> Input check
+			> Required sequence part counted
+			> Fibonacci-env check finished
+			> Using long printer:
+			length=20 capacity=32 Result: [0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987 1597 2584 4181]
 
-		* [Using cache]
-		> Fibonacci-env check finished
-		! Using long printer:
-		length=20 capacity=32 Result: [0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987 1597 2584 4181]
-		<< Experimental part ended
+			* [Using cache]
+			> Fibonacci-env check finished
+			> Using long printer:
+			length=17 capacity=32 Result: [0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987]
+			<< Optional part ended
 
-		<< Main program exited
+			<< Main program exited
 
-		Process finished with exit code 0
+			Process finished with exit code 0
+
 		*/
 	}
 }
