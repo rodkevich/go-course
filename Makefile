@@ -55,8 +55,11 @@ ff-playground:
 ff-tour:
 	firefox -new-tab "https://tour.golang.org/welcome/1"
 
+ff-ref-go-pkg:
+	firefox -new-tab "https://golang.org/pkg/"
+
 ff-ref-go-modules:
 	firefox -new-tab "https://golang.org/ref/mod#modules-overview"
 
 ff-git-go-course:
-	firefox -new-tab "https://golang.org/ref/mod#modules-overview"
+	firefox -new-tab "https://github.com/rodkevich/go-course"
