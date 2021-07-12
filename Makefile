@@ -28,6 +28,11 @@ go-run-homework-optional:
 	@read -p "LESSON NUMBER: " LESSON_NUMBER; \
 	go run ./cmd/hw$${LESSON_NUMBER}/solution-hw-$${LESSON_NUMBER}.go -o
 
+go-run-homework-tests:
+	@read -p "LESSON NUMBER: " LESSON_NUMBER; \
+	cd ./homework/hw$${LESSON_NUMBER};\
+	go test ./...
+
 .PHONY: go-bench
 #go-run-homework-001-bench1:
 #	cd ./homework/hw001/helloWorldPrinter; \

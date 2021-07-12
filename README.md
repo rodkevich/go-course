@@ -7,9 +7,12 @@ Homework syntax is like go-run-homework:
 `make go-run-homework`
 
 For optional code:  
-`go-run-homework-optional`
+`make go-run-homework-optional`
 
 For experimental code:  
-`go-run-homework-exp` 
+`make go-run-homework-exp` 
+
+For code tests:  
+`make go-run-homework-tests` 
 
 Then: input number of lesson for example `002`
