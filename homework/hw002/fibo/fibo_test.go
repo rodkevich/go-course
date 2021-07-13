@@ -6,8 +6,8 @@ import (
 )
 
 func TestSizedSequence64bit(t *testing.T) {
-	var expected = []int64{0, 1, 1}
-	var got, err = sizedSequence64bit(3)
+	var expected = []int64{0, 1, 1, 2, 3, 5, 8}
+	var got, err = sizedSequence64bit(7)
 	//show slices info
 	printS(got)
 	printS(expected)
@@ -33,12 +33,6 @@ func TestSizedSequence64bit(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error here err. err = %d; want __", err)
 	}
-	///////////////////////////////////////
-	// TODO: find why this fails
-	///////////////////////////////////////
-	//if got != expected {
-	//	t.Errorf("Error in FAILING TEST.  got = %d; expected = %d", len(got), len(expected))
-	//}
 }
 func printS(s []int64) {
 	fmt.Printf("type=%T, len=%d cap=%d %v\n", s, len(s), cap(s), s)

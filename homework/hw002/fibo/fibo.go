@@ -8,10 +8,10 @@ import (
 
 var (
 	//error to try customizing
-	errorLimitOf64bitSeq = errors.New("abort app: wrong sequence size provided. Max 64bit sequence size is 93")
-	errorNegativeNumber  = errors.New("abort app: negatives are not allowed")
-	errorBadEnvVars      = errors.New("abort app: required env vars were not correct")
-	errorNotImplemented  = errors.New("abort app: implementation is not there yet. See ya")
+	errorLimitOf64bitSeq = errors.New("abort app: Wrong sequence size provided. Max 64bit sequence size is 93")
+	errorNegativeNumber  = errors.New("abort app: Negatives are not allowed")
+	errorBadEnvVars      = errors.New("abort app: Required env vars were not correct")
+	errorNotImplemented  = errors.New("abort app: Implementation is not there yet. See ya")
 	knownPrinters        = []struct {
 		name        string
 		implemented bool
