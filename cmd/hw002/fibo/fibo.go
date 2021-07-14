@@ -22,7 +22,7 @@ func SizedSequence64bit(size int64) ([]int64, error) {
 		if counted < 0 {
 			fmt.Printf("! Warn: 64 bit overflow on %d iteration \n", i+1)
 			size = i
-			break
+			return rtn[0:size], errors.New("error: 64 bit overflowed : rtn size is now on maximum and equals 93")
 		}
 		// prepare vars for new iteration
 		a, b = b, counted
