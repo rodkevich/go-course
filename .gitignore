@@ -17,4 +17,4 @@
 # Materials from lectures
 lectures/
 _experimental/
-../../../srcipts/Makefile
+/Makefile
