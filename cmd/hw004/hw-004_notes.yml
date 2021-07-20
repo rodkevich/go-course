@@ -1,0 +1,27 @@
+requirements:
+  - Lesson_04:
+    Implement Shape interface for Circle and Perimeter structs and use it to print information
+    about them with the DescribeShape function.
+    The result of calling DescribeShape function must output into terminal the following
+    for a Circle and Rectangle(the numbers may differ depending on the dimensions you picked)
+
+    Circle: Radius 8.00
+    Area: 201.06
+    Perimeter: 50.27
+
+    Rectangle with Height 9.00 and Width 3.00
+    Area: 27.00
+    Perimeter: 24.00
+
+    You must not change the DescribeShape function!
+    Hint: To be able to do that you will need to implement fmt.Stringer for your shapes
+    Hint #2: you might need to use math.Pi and math.Pow from the math package in the standard go library:
+    https://pkg.go.dev/math (this is preferred way, but you definitely can do it without it)
+
+links:
+  floats-formating:
+    - https://pkg.go.dev/fmt#Sprintf
+  interface-names:
+    - https://golang.org/doc/effective_go#interface-names
+  interfaces-eff-go:
+    - https://golang.org/doc/effective_go#interfaces
