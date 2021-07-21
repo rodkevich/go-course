@@ -1,25 +1,23 @@
 package arrayhw
 
-import (
-	"fmt"
-	"strconv"
-)
+// CountAverageOfArray function to count average from input using array
+func CountAverageOfArray(input []float64) ([]float64, int, float64) {
+	var (
+		sum float64
+		avg float64
+	)
+	arrayLength := len(input)
+	array := make([]float64, arrayLength)
 
-// Input ...
-type Input = [6]float64
+	for i := 0; i < arrayLength; i++ {
+		array[i] = input[i]
+	}
 
-// Average ...
-type Average func() float64
+	for _, each := range array {
+		sum += each
+	}
 
-// ArrayWithFunction ...
-type ArrayWithFunction struct {
-	Input *Input
-	Avg   Average // to try adding function in place
-}
+	avg = sum / float64(arrayLength)
 
-// PrintDetailedAverageForArrImp try to add function to type in a pkg
-func (arr *ArrayWithFunction) PrintDetailedAverageForArrImp(res float64) {
-	// prettify value when printing
-	value := strconv.FormatFloat(res, 'f', -1, 64)
-	fmt.Printf("arrayshw | result | Avg() =  %v", value)
+	return array, arrayLength, avg
 }

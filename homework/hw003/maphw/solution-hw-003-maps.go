@@ -6,7 +6,7 @@ import (
 )
 
 // PrintValuesSortedByIncrKeys prints map values sorted in order of increasing keys
-func PrintValuesSortedByIncrKeys(m map[int]string) ([]string, error) {
+func PrintValuesSortedByIncrKeys(m map[int]string) {
 	// allocate slices with length according to map
 	rtn := make([]string, 0, len(m)) // to return results
 	keys := make([]int, 0, len(m))
@@ -22,6 +22,5 @@ func PrintValuesSortedByIncrKeys(m map[int]string) ([]string, error) {
 	}
 
 	fmt.Printf("\nmapshw | result | PrintValuesSortedByIncrKeys() val=%v", rtn)
-	return rtn, nil
-
+	return
 }
