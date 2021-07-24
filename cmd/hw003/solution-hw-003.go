@@ -2,11 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/rodkevich/go-course/homework/hw003"
 	"strconv"
-
-	"github.com/rodkevich/go-course/homework/hw003/arrayhw"
-	"github.com/rodkevich/go-course/homework/hw003/maphw"
-	"github.com/rodkevich/go-course/homework/hw003/slicehw"
 )
 
 func main() {
@@ -14,31 +11,25 @@ func main() {
 	// PART 1: Arrays (average):
 	var input = []float64{1, 2, 3, 4, 5, 6}
 
-	// переделал на преобразование в array внутри функции потому что
-	// не знаю как отвечать на заданный вопрос почему input ограничен до [6]float64  =)
-	// по заданию нужно работать с array a не slice
+	avg := hw003.CountAverageOfArray(input)
+	avgFormatted := strconv.FormatFloat(avg, 'f', -1, 64)
 
-	arr, l, avg := arrayhw.CountAverageOfArray(input)
-	value := strconv.FormatFloat(avg, 'f', -1, 64)
-
-	fmt.Printf("arrayshw | result | array=%v len=%v, Avg()=%v", arr, l, value)
+	fmt.Printf("arrayshw | result | Avg()=%v", avgFormatted)
 
 	// PART 2: Slices - 1 (longest string in slice):
-	var sliceCases = []struct{ input []string }{
-		{[]string{"one", "two", "three"}},
-		{[]string{"one", "two"}},
-	}
+	var sliceCases = [][]string{{"one", "two", "three"}, {"one", "two"}}
+
 	for _, each := range sliceCases {
-		l, max, err := slicehw.LongestStrInSlice(each.input)
+		max, err := hw003.LongestStrInSlice(each)
 		if err != nil {
 			fmt.Printf("\nsliceshw | error | LongestStrInSlice() Output: %v", err)
 		}
-		fmt.Printf("\nsliceshw | result | LongestStrInSlice() length=%v, val=%v", l, max)
+		fmt.Printf("\nsliceshw | result | LongestStrInSlice() val=%v", max)
 	}
 
 	// PART 2: Slices - 2 (reversed ints):
 	inputSlice := []int64{1, 2, 5, 15}
-	res := slicehw.ReverseSliceOfInts(inputSlice)
+	res := hw003.ReverseSliceOfInts(inputSlice)
 
 	fmt.Printf("\nsliceshw | result | ReverseSliceOfInts() val=%v", res)
 
@@ -48,6 +39,6 @@ func main() {
 		{map[int]string{10: "aa", 0: "bb", 500: "cc"}},
 	}
 	for _, each := range mapCases {
-		maphw.PrintValuesSortedByIncrKeys(each.input)
+		hw003.PrintValuesSortedByIncrKeys(each.input)
 	}
 }

@@ -1,4 +1,4 @@
-package maphw
+package hw003
 
 import (
 	"fmt"
