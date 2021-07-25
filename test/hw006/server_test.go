@@ -1,0 +1,34 @@
+package hw006
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/rodkevich/go-course/homework/hw006/task01"
+	a "github.com/stretchr/testify/assert"
+)
+
+func TestEchoServer(t *testing.T) {
+	t.Run("any request returning JSON with headers",
+		func(t *testing.T) {
+			e := new(task01.EchoServer)
+			handler := http.HandlerFunc(e.ShowHeaders)
+			a.HTTPStatusCode(t, handler, "GET", "/anything/you?want", nil, 200)
+			a.HTTPStatusCode(t, handler, "POST", "/want?you?or?not", nil, 200)
+			request, _ := http.NewRequest(
+				http.MethodGet,
+				"/anything/you?want",
+				nil,
+			)
+			response := httptest.NewRecorder()
+			s := new(task01.EchoServer)
+			s.ShowHeaders(response, request)
+			anythingYouWant := response.Body.String()
+			var reqHeaders = []string{"host", "user_agent", "request_uri", "headers"}
+			for _, h := range reqHeaders {
+				a.Contains(t, anythingYouWant, h)
+			}
+		},
+	)
+}
