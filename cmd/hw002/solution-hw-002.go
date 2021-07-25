@@ -8,15 +8,14 @@ import (
 
 func main() {
 	defer fmt.Println("\n<< Main program exited")
-
 	fmt.Println("Hello from Fibonacci-app")
 
-	var n int64 = -100500
+	var n int64 = 33
 	result, err := fibo.SizedSequence64bit(n)
+
 	if err != nil {
 		fmt.Println(err)
 	}
-
 	fmt.Println(result)
 }
 

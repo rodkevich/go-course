@@ -25,12 +25,11 @@ func SizedSequence64bit(size int64) ([]int64, error) {
 	)
 	rtn = append(rtn, a, b) // init with first two
 	for i := int64(2); i <= size; i++ {
-		var counted int64 = a + b
+		var counted = a + b
 		if counted < 0 {
 			_ = log.Output(1, "fibo: error: 64 bit overflow")
 			return nil, errors.New(err64bitOverflow)
 		}
-
 		// prepare vars for iteration
 		a, b = b, counted
 		rtn = append(rtn, counted)
