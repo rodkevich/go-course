@@ -8,8 +8,8 @@ type Rectangle struct {
 	Width  float64
 }
 
-// NewRectangle make a new shape of rectangle type
-func NewRectangle(height float64, width float64) Rectangle {
+// New make a new shape of rectangle type
+func New(height float64, width float64) Rectangle {
 	return Rectangle{Height: height, Width: width}
 }
 

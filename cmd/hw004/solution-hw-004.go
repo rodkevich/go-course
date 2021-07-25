@@ -22,8 +22,8 @@ func main() {
 	// 	Width:  3,
 	// }
 
-	c := circle.NewCircle(12)
-	r := rectangle.NewRectangle(7, 6)
+	c := circle.New(12)
+	r := rectangle.New(7, 6)
 
 	DescribeShape(c)
 	DescribeShape(r)
