@@ -16,7 +16,7 @@ type EchoServer interface {
 }
 
 func NewEchoServer(address string) EchoServer {
-	return &echoServer{
+	return echoServer{
 		Address:     address,
 		somePrivate: "localhost:5000",
 	}
@@ -29,7 +29,7 @@ type showHeadersResponse struct {
 	Headers    http.Header `json:"headers"`
 }
 
-func (e *echoServer) showHeaders(w http.ResponseWriter, r *http.Request) {
+func (e echoServer) showHeaders(w http.ResponseWriter, r *http.Request) {
 	raw := showHeadersResponse{
 		Host:       r.Host,
 		UserAgent:  r.UserAgent(),
@@ -43,7 +43,7 @@ func (e *echoServer) showHeaders(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (e *echoServer) Run() {
+func (e echoServer) Run() {
 	handler := http.HandlerFunc(e.showHeaders)
 	log.Fatal(http.ListenAndServe(e.Address, handler))
 
