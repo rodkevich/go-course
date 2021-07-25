@@ -21,6 +21,6 @@ func PrintValuesSortedByIncrKeys(m map[int]string) {
 		rtn = append(rtn, m[key])
 	}
 
-	fmt.Printf("\nmapshw | result | PrintValuesSortedByIncrKeys() val=%v", rtn)
+	fmt.Printf("\nresult | PrintValuesSortedByIncrKeys() val=%v", rtn)
 	return
 }

@@ -1,9 +1,8 @@
 package hw003
 
 // CountAverageOfArray function to count average from input using array
-func CountAverageOfArray(input []float64) float64 {
+func CountAverageOfArray(input [6]float64) float64 {
 	var sum, avg float64
-
 	for _, each := range input {
 		sum += each
 	}
