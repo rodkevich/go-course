@@ -6,18 +6,31 @@ import (
 	"net/http"
 )
 
-type EchoServer struct {
+type echoServer struct {
+	Address     string
+	somePrivate string
 }
 
-type ShowHeadersResponse struct {
+type EchoServer interface {
+	Run()
+}
+
+func NewEchoServer(address string) EchoServer {
+	return &echoServer{
+		Address:     address,
+		somePrivate: "localhost:5000",
+	}
+}
+
+type showHeadersResponse struct {
 	Host       string      `json:"host"`
 	UserAgent  string      `json:"user_agent"`
 	RequestUri string      `json:"request_uri"`
 	Headers    http.Header `json:"headers"`
 }
 
-func (e *EchoServer) ShowHeaders(w http.ResponseWriter, r *http.Request) {
-	raw := ShowHeadersResponse{
+func (e *echoServer) showHeaders(w http.ResponseWriter, r *http.Request) {
+	raw := showHeadersResponse{
 		Host:       r.Host,
 		UserAgent:  r.UserAgent(),
 		RequestUri: r.RequestURI,
@@ -26,11 +39,12 @@ func (e *EchoServer) ShowHeaders(w http.ResponseWriter, r *http.Request) {
 	err := json.NewEncoder(w).Encode(raw)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		log.Printf("Error on JSON marshal. Err: %s", err)
+		log.Printf("Error while processing JSON. Err: %s", err)
 	}
 }
 
-func (e *EchoServer) Run() {
-	handler := http.HandlerFunc(e.ShowHeaders)
-	log.Fatal(http.ListenAndServe(":8080", handler))
+func (e *echoServer) Run() {
+	handler := http.HandlerFunc(e.showHeaders)
+	log.Fatal(http.ListenAndServe(e.Address, handler))
+
 }
