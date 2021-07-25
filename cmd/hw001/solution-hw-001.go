@@ -12,7 +12,9 @@ import (
 	"github.com/kyokomi/emoji"
 )
 
+// main prints `Hello, world :relaxed:` with emoji
 func main() {
+
 	fmt.Println(emoji.Sprint(`Hello, world :relaxed:`))
 }
 

@@ -1,4 +1,4 @@
-package hwp
+package helloWorldPrinter
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 
 const prefix = "Hello, world "
 
-// 	AddEmoji prints `Hello, world ` with an added emoji symbol using bytes.Buffer
+//AddEmoji prints `Hello, world ` with an added emoji symbol using bytes.Buffer
 func AddEmoji(symbol string, writer func(a ...interface{}) (n int, err error)) int {
 	var b bytes.Buffer // сложение литералов в байт-буфер кажись самое оптимальное
 	b.WriteString(prefix)
@@ -21,7 +21,7 @@ func AddEmoji(symbol string, writer func(a ...interface{}) (n int, err error)) i
 	return bytesWriten
 }
 
-// 	AddEmoji2 prints `Hello, world ` with an added emoji symbol using + operator
+//AddEmoji2 prints `Hello, world ` with an added emoji symbol using + operator
 func AddEmoji2(symbol string, writer func(a ...interface{}) (n int, err error)) int {
 	bytesWriten, err := writer(prefix + symbol)
 	if err != nil {
@@ -30,7 +30,7 @@ func AddEmoji2(symbol string, writer func(a ...interface{}) (n int, err error)) 
 	return bytesWriten
 }
 
-// 	AddEmoji3 prints `Hello, world ` with an added emoji symbol using strings.Builder
+//AddEmoji3 prints `Hello, world ` with an added emoji symbol using strings.Builder
 func AddEmoji3(symbol string, writer func(a ...interface{}) (n int, err error)) int {
 	var line strings.Builder
 	line.WriteString(prefix)
