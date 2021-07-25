@@ -12,7 +12,7 @@ import (
 func TestEchoServer(t *testing.T) {
 	t.Run("any request returning JSON with headers",
 		func(t *testing.T) {
-			e := new(task01.EchoServer)
+			e := task01.NewEchoServer("localhost:9080")
 			handler := http.HandlerFunc(e.ShowHeaders)
 			assert.HTTPStatusCode(t, handler, "GET", "/anything/you?want", nil, 200)
 			assert.HTTPStatusCode(t, handler, "POST", "/want?you?or?not", nil, 200)
@@ -22,8 +22,7 @@ func TestEchoServer(t *testing.T) {
 				nil,
 			)
 			response := httptest.NewRecorder()
-			s := new(task01.EchoServer)
-			s.ShowHeaders(response, request)
+			e.ShowHeaders(response, request)
 			anythingYouWant := response.Body.String()
 			var reqHeaders = []string{"host", "user_agent", "request_uri", "headers"}
 			for _, h := range reqHeaders {

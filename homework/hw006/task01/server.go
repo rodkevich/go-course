@@ -8,17 +8,18 @@ import (
 
 type echoServer struct {
 	Address     string
-	somePrivate string
+	SomePrivate string
 }
 
 type EchoServer interface {
+	ShowHeaders(w http.ResponseWriter, r *http.Request)
 	Run()
 }
 
 func NewEchoServer(address string) EchoServer {
 	return echoServer{
 		Address:     address,
-		somePrivate: "localhost:5000",
+		SomePrivate: "localhost:5000",
 	}
 }
 
@@ -29,7 +30,7 @@ type showHeadersResponse struct {
 	Headers    http.Header `json:"headers"`
 }
 
-func (e echoServer) showHeaders(w http.ResponseWriter, r *http.Request) {
+func (e echoServer) ShowHeaders(w http.ResponseWriter, r *http.Request) {
 	raw := showHeadersResponse{
 		Host:       r.Host,
 		UserAgent:  r.UserAgent(),
@@ -44,7 +45,6 @@ func (e echoServer) showHeaders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e echoServer) Run() {
-	handler := http.HandlerFunc(e.showHeaders)
+	handler := http.HandlerFunc(e.ShowHeaders)
 	log.Fatal(http.ListenAndServe(e.Address, handler))
-
 }
