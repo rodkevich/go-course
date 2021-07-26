@@ -11,11 +11,13 @@ type echoServer struct {
 	SomePrivate string
 }
 
+// EchoServer server command interface
 type EchoServer interface {
 	ShowHeaders(w http.ResponseWriter, r *http.Request)
 	Run()
 }
 
+// NewEchoServer create a new server on demand
 func NewEchoServer(address string) EchoServer {
 	return echoServer{
 		Address:     address,
@@ -26,15 +28,16 @@ func NewEchoServer(address string) EchoServer {
 type showHeadersResponse struct {
 	Host       string      `json:"host"`
 	UserAgent  string      `json:"user_agent"`
-	RequestUri string      `json:"request_uri"`
+	RequestURI string      `json:"request_uri"`
 	Headers    http.Header `json:"headers"`
 }
 
+// ShowHeaders route returning headers in response
 func (e echoServer) ShowHeaders(w http.ResponseWriter, r *http.Request) {
 	raw := showHeadersResponse{
 		Host:       r.Host,
 		UserAgent:  r.UserAgent(),
-		RequestUri: r.RequestURI,
+		RequestURI: r.RequestURI,
 		Headers:    r.Header,
 	}
 	err := json.NewEncoder(w).Encode(raw)
@@ -44,6 +47,7 @@ func (e echoServer) ShowHeaders(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Run start a server
 func (e echoServer) Run() {
 	handler := http.HandlerFunc(e.ShowHeaders)
 	log.Fatal(http.ListenAndServe(e.Address, handler))

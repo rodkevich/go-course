@@ -8,6 +8,7 @@ import (
 	"github.com/rodkevich/go-course/homework/hw006/task01"
 )
 
+// serve on adress
 const address = "localhost:8080"
 
 func main() {
@@ -22,6 +23,13 @@ func main() {
 }
 
 // Response:
-// {"host":"localhost:8080","user_agent":"curl/7.68.0","request_uri":"/","headers":{"Accept":["*/*"],"User-Agent":["curl/7.68.0"]}}
-//
+// {
+// "host":"localhost:8080",
+// "user_agent":"curl/7.68.0",
+// "request_uri":"/",
+// "headers":{
+// "Accept":["*/*"],
+// "User-Agent":["curl/7.68.0"]}
+// }
+
 // Process finished with exit code 0
