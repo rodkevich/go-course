@@ -2,20 +2,23 @@ package task02
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
+
+	"github.com/rodkevich/go-course/homework/hw006/task02/internal/helpers"
 )
 
 type listenServer struct {
 	Address string
+	output  func(w io.Writer, a ...interface{}) (n int, err error)
 }
 
 // ListenServer ...
 type ListenServer interface {
-	ReturnMultipliedOrUppercase(w http.ResponseWriter, r *http.Request)
+	procByteItemsFromStdin(w http.ResponseWriter, r *http.Request)
 	Run()
 }
 
@@ -23,29 +26,23 @@ type ListenServer interface {
 func NewListenServer(address string) ListenServer {
 	return listenServer{
 		Address: address,
+		output:  fmt.Fprintln,
 	}
 }
 
-// ReturnMultipliedOrUppercase ...
-func (l listenServer) ReturnMultipliedOrUppercase(w http.ResponseWriter, r *http.Request) {
-	respBody, ioErr := ioutil.ReadAll(r.Body)
+// procByteItemsFromStdin ...
+func (s listenServer) procByteItemsFromStdin(w http.ResponseWriter, r *http.Request) {
+	rb, ioErr := ioutil.ReadAll(r.Body)
 	if ioErr != nil {
-		fmt.Fprintln(w, "reading body from request:", ioErr)
+		s.output(w, "reading body from request:", ioErr)
 	}
-	separatedEnts := strings.Split(string(respBody), `\n`)
-	for i := 0; i < len(separatedEnts); i++ {
-		if _, err := strconv.Atoi(separatedEnts[i]); err == nil {
-			fmt.Printf("%q looks like a number.\n", separatedEnts[i])
-			var a int
-			fmt.Sscanf(separatedEnts[i], "%d", &a)
-			fmt.Fprintln(w, a, "to Multiplied by 2:", a*2)
-			continue
-		}
-		fmt.Fprintln(w, separatedEnts[i], "to Uppercase:", strings.ToUpper(separatedEnts[i]))
-	}
+	items := strings.Split(string(rb), `\n`)
+
+	rtn := helpers.MultiplyOrUpperDepOfType(items)
+	s.output(w, "Result:", rtn)
 }
 
-func (l listenServer) Run() {
-	handler := http.HandlerFunc(l.ReturnMultipliedOrUppercase)
-	log.Fatal(http.ListenAndServe(l.Address, handler))
+func (s listenServer) Run() {
+	handler := http.HandlerFunc(s.procByteItemsFromStdin)
+	log.Fatal(http.ListenAndServe(s.Address, handler))
 }
