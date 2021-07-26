@@ -1,6 +1,7 @@
 package task02
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io/ioutil"
@@ -14,6 +15,7 @@ type clientCLI struct {
 	client  http.Client
 }
 
+// NewClient ...
 func NewClient(address string) Client {
 	return clientCLI{
 		Address: address,
@@ -25,27 +27,32 @@ func NewClient(address string) Client {
 }
 
 type Client interface {
-	CallServerControlled(newLine string)
+	CallServer([]byte)
 	Start()
 }
 
-func (c clientCLI) CallServerControlled(s string) {
+// CallServer ...
+func (c clientCLI) CallServer(lines []byte) {
 	url := "http://" + c.Address
-	data := s
-	body := bytes.NewBufferString(data)
+	body := bytes.NewBuffer(lines)
 	req, _ := http.NewRequest(http.MethodPost, url, body)
 	resp, _ := c.client.Do(req)
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
-	fmt.Printf("CallServerControlled %#v\n\n\n", string(respBody))
+	fmt.Printf("Response form Server: %#v\n", string(respBody))
 }
 
+// Start ...
 func (c clientCLI) Start() {
-	var newLine string
 	fmt.Print("Enter what u wanna process: \n")
-	_, _ = fmt.Scanln(&newLine) // get input value into newLine var
-	c.CallServerControlled(newLine)
-	if newLine == "exit" {
-		os.Exit(0)
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		if scanner.Text() == "exit" {
+			os.Exit(0)
+		}
+		c.CallServer(scanner.Bytes())
+	}
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "reading os.Stdin:", err)
 	}
 }
