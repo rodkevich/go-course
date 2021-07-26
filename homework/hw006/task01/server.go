@@ -2,6 +2,7 @@ package task01
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -13,7 +14,7 @@ type echoServer struct {
 
 // EchoServer server command interface
 type EchoServer interface {
-	ShowHeaders(w http.ResponseWriter, r *http.Request)
+	ReturnHeaders(w http.ResponseWriter, r *http.Request)
 	Run()
 }
 
@@ -32,8 +33,8 @@ type showHeadersResponse struct {
 	Headers    http.Header `json:"headers"`
 }
 
-// ShowHeaders route returning headers in response
-func (e echoServer) ShowHeaders(w http.ResponseWriter, r *http.Request) {
+// ReturnHeaders returns headers in response
+func (e echoServer) ReturnHeaders(w http.ResponseWriter, r *http.Request) {
 	raw := showHeadersResponse{
 		Host:       r.Host,
 		UserAgent:  r.UserAgent(),
@@ -42,13 +43,12 @@ func (e echoServer) ShowHeaders(w http.ResponseWriter, r *http.Request) {
 	}
 	err := json.NewEncoder(w).Encode(raw)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		log.Printf("Error while processing JSON. Err: %s", err)
+		fmt.Fprintln(w, "Error while processing JSON. Err: ",err)
 	}
 }
 
 // Run start a server
 func (e echoServer) Run() {
-	handler := http.HandlerFunc(e.ShowHeaders)
+	handler := http.HandlerFunc(e.ReturnHeaders)
 	log.Fatal(http.ListenAndServe(e.Address, handler))
 }
