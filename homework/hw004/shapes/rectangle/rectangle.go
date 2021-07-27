@@ -22,6 +22,7 @@ func New(height float64, width float64) Rectangle {
 func (r Rectangle) Area() (float64, error) {
 	if h.UsedArgsIncludeInvalid([]float64{r.Width, r.Height}) {
 		return 0, errors.New(h.UsingInvalidArgs)
+
 	}
 	return r.Width * r.Height, nil
 }

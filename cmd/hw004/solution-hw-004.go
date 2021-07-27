@@ -11,7 +11,7 @@ import (
 func main() {
 
 	c := circle.New(12)
-	r := rectangle.New(7, 6)
+	r := rectangle.New(9.00, 3.00)
 
 	DescribeShape(c)
 	DescribeShape(r)

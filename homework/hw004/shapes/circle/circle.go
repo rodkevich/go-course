@@ -21,7 +21,6 @@ func New(radius float64) Circle {
 func (c Circle) Area() (float64, error) {
 	if h.UsedArgsIncludeInvalid([]float64{c.Radius}) {
 		return 0, errors.New(h.UsingInvalidArgs)
-
 	}
 	return math.Pi * math.Pow(c.Radius, 2), nil
 }
