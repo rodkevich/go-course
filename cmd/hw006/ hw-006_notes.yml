@@ -6,8 +6,8 @@ Lesson_06:
         "user_agent": "curl/7.67.0",
         "request_uri": "/anything/you?want",
         "headers": {
-          "Accept": ["*/*"],
-          "User-Agent": ["curl/7.67.0"]
+          "Accept": [ "*/*" ],
+          "User-Agent": [ "curl/7.67.0" ]
         }
       }
     note:
@@ -31,4 +31,5 @@ Lesson_06:
     - Page reloads, token value displayed on page(read it from cookie)
     Note:
       you can use simple HTML template for this task:
-      - https://jsfiddle.net/7vhun1tc/ or create your own, it’s up to you. This task (as course as well) is about golang, so it’s cool to have some practice in HTML/JS, but it’s not a requirement.
+        - https://jsfiddle.net/7vhun1tc/ or create your own, it’s up to you. This task (as course as well) is about golang,
+          so it’s cool to have some practice in HTML/JS, but it’s not a requirement.
