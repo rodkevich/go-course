@@ -8,7 +8,7 @@ import (
 	"github.com/rodkevich/go-course/homework/hw006/task01"
 )
 
-// serve on adress
+// serve on address
 const address = "localhost:8080"
 
 func main() {

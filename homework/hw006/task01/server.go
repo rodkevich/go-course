@@ -43,7 +43,7 @@ func (e echoServer) ReturnHeaders(w http.ResponseWriter, r *http.Request) {
 	}
 	err := json.NewEncoder(w).Encode(raw)
 	if err != nil {
-		fmt.Fprintln(w, "Error while processing JSON. Err: ",err)
+		fmt.Fprintln(w, "Error while processing JSON. Err: ", err)
 	}
 }
 

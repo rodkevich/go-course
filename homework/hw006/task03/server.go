@@ -19,6 +19,7 @@ type webServer struct {
 	output  func(w io.Writer, a ...interface{}) (n int, err error)
 }
 
+// NewWebServer constructor for instance
 func NewWebServer() *webServer {
 	return &webServer{
 		Address: address,
@@ -26,27 +27,28 @@ func NewWebServer() *webServer {
 	}
 }
 
+// Run start a new server instance
 func (s webServer) Run() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", s.handler).Methods("GET", "POST")
+	r.HandleFunc("/", s.solutionHandler).Methods("GET", "POST")
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(s.Address, nil))
 	// log.Fatal(http.ListenAndServe(":5050", http.FileServer(http.Dir("./static"))))
 }
 
-func (s webServer) handler(w http.ResponseWriter, r *http.Request) {
+func (s webServer) solutionHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 
 	case "GET":
-		s.ifGet(w, r)
+		s.processGetMSG(w, r)
 	case "POST":
-		s.ifPost(w, r)
+		s.processPostMSG(w, r)
 	default:
 		s.output(w, "Use GET or POST")
 	}
 }
 
-func (s webServer) ifPost(w http.ResponseWriter, r *http.Request) {
+func (s webServer) processPostMSG(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		fmt.Fprintf(w, "ParseForm() err: %v", err)
 		return
@@ -61,6 +63,6 @@ func (s webServer) ifPost(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, indexPath)
 }
 
-func (s webServer) ifGet(w http.ResponseWriter, r *http.Request) {
+func (s webServer) processGetMSG(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, indexPath)
 }

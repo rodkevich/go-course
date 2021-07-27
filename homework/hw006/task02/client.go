@@ -17,7 +17,7 @@ type clientCLI struct {
 	printer func(w io.Writer, a ...interface{}) (n int, err error)
 }
 
-// NewClient ...
+// NewClient constructor function
 func NewClient(address string) Client {
 	return clientCLI{
 		Address: address,
@@ -28,14 +28,14 @@ func NewClient(address string) Client {
 	}
 }
 
-// Client ...
+// Client to work from CLI
 type Client interface {
-	MakeCallToServer([]byte)
+	makeCallToServer([]byte)
 	Start()
 }
 
-// MakeCallToServer ...
-func (c clientCLI) MakeCallToServer(lines []byte) {
+// makeCallToServer function connects and requests remote
+func (c clientCLI) makeCallToServer(lines []byte) {
 
 	url := "http://" + c.Address
 	body := bytes.NewBuffer(lines)
@@ -46,7 +46,7 @@ func (c clientCLI) MakeCallToServer(lines []byte) {
 	c.printer(os.Stdout, string(rbd))
 }
 
-// Start ...
+// Start the instance of client
 func (c clientCLI) Start() {
 	fmt.Print("Enter what u wanna process: \n")
 	scanner := bufio.NewScanner(os.Stdin)
@@ -54,7 +54,7 @@ func (c clientCLI) Start() {
 		if scanner.Text() == "exit" {
 			os.Exit(0)
 		}
-		c.MakeCallToServer(scanner.Bytes())
+		c.makeCallToServer(scanner.Bytes())
 	}
 	if err := scanner.Err(); err != nil {
 		c.printer(os.Stderr, "reading os.Stdin:", err)

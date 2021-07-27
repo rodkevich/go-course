@@ -16,13 +16,13 @@ type listenServer struct {
 	output  func(w io.Writer, a ...interface{}) (n int, err error)
 }
 
-// ListenServer ...
+// ListenServer represents server
 type ListenServer interface {
 	procByteItemsFromStdin(w http.ResponseWriter, r *http.Request)
 	Run()
 }
 
-// NewListenServer ...
+// NewListenServer constructor
 func NewListenServer(address string) ListenServer {
 	return listenServer{
 		Address: address,
@@ -30,7 +30,7 @@ func NewListenServer(address string) ListenServer {
 	}
 }
 
-// procByteItemsFromStdin ...
+// procByteItemsFromStdin to be used as a handler for processing requests
 func (s listenServer) procByteItemsFromStdin(w http.ResponseWriter, r *http.Request) {
 	rb, ioErr := ioutil.ReadAll(r.Body)
 	if ioErr != nil {
@@ -42,6 +42,7 @@ func (s listenServer) procByteItemsFromStdin(w http.ResponseWriter, r *http.Requ
 	s.output(w, "Result:", rtn)
 }
 
+// Run start an instance of a server
 func (s listenServer) Run() {
 	handler := http.HandlerFunc(s.procByteItemsFromStdin)
 	log.Fatal(http.ListenAndServe(s.Address, handler))

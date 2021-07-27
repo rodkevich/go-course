@@ -23,10 +23,10 @@ func TestEchoServer(t *testing.T) {
 			)
 			response := httptest.NewRecorder()
 			e.ReturnHeaders(response, request)
-			anythingYouWant := response.Body.String()
+			thingsYouGet := response.Body.String()
 			var reqHeaders = []string{"host", "user_agent", "request_uri", "headers"}
-			for _, h := range reqHeaders {
-				assert.Contains(t, anythingYouWant, h)
+			for _, stuffThatYouWant := range reqHeaders {
+				assert.Contains(t, thingsYouGet, stuffThatYouWant)
 			}
 		},
 	)
