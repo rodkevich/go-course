@@ -1,6 +1,11 @@
 package rectangle
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+
+	h "github.com/rodkevich/go-course/homework/hw004/shapes/internal/helpers"
+)
 
 // Rectangle struct describing rectangle figure
 type Rectangle struct {
@@ -14,15 +19,22 @@ func New(height float64, width float64) Rectangle {
 }
 
 // Area S=a*b
-func (r Rectangle) Area() float64 {
-	return r.Width * r.Height
+func (r Rectangle) Area() (float64, error) {
+	if h.UsedArgsIncludeInvalid([]float64{r.Width, r.Height}) {
+		return 0, errors.New(h.UsingInvalidArgs)
+	}
+	return r.Width * r.Height, nil
 }
 
 // Perimeter P=2(a+b)
-func (r Rectangle) Perimeter() float64 {
-	return 2 * (r.Height + r.Width)
+func (r Rectangle) Perimeter() (float64, error) {
+	if h.UsedArgsIncludeInvalid([]float64{r.Width, r.Height}) {
+		return 0, errors.New(h.UsingInvalidArgs)
+	}
+	return 2 * (r.Height + r.Width), nil
 }
 
+// String prints to output
 func (r Rectangle) String() string {
 	return fmt.Sprintf("Rectangle with Height %.2f and Width %.2f", r.Height, r.Width)
 }

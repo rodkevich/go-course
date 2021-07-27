@@ -1,0 +1,13 @@
+Lesson_05:
+  Extend methods:
+    - area,
+    - perimeter, from previous HW with additional checks for valid arguments.
+  Arguments must not be:
+    - negative
+    - null
+  In case if arguments invalid:
+    - method should return an error.
+  note:
+    - Error must be handled by the consumer.
+  Cover:
+    - 100% code with unit tests.

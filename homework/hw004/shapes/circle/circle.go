@@ -1,8 +1,11 @@
 package circle
 
 import (
+	"errors"
 	"fmt"
 	"math"
+
+	h "github.com/rodkevich/go-course/homework/hw004/shapes/internal/helpers"
 )
 
 // Circle struct describing circle figure
@@ -15,15 +18,23 @@ func New(radius float64) Circle {
 }
 
 // Area S=πR²
-func (c Circle) Area() float64 {
-	return math.Pi * math.Pow(c.Radius, 2)
+func (c Circle) Area() (float64, error) {
+	if h.UsedArgsIncludeInvalid([]float64{c.Radius}) {
+		return 0, errors.New(h.UsingInvalidArgs)
+
+	}
+	return math.Pi * math.Pow(c.Radius, 2), nil
 }
 
 // Perimeter P=2πR
-func (c Circle) Perimeter() float64 {
-	return 2 * math.Pi * c.Radius
+func (c Circle) Perimeter() (float64, error) {
+	if h.UsedArgsIncludeInvalid([]float64{c.Radius}) {
+		return 0, errors.New(h.UsingInvalidArgs)
+	}
+	return 2 * math.Pi * c.Radius, nil
 }
 
+// String prints to output
 func (c Circle) String() string {
 	return fmt.Sprintf("Circle: Radius %.2f", c.Radius)
 }
