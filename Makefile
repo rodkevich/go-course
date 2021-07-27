@@ -33,6 +33,13 @@ go-run-homework-tests:
 	cd ./homework/hw$${LESSON_NUMBER};\
 	go test -v ./...
 
+go-run-coverage:
+	go test -count=1 -timeout=1s -short -race -covermode=atomic ./...
+
+go-fmt:
+	go fmt ./...
+
+
 .PHONY: go-bench
 #go-run-homework-001-bench1:
 #	cd ./homework/hw001/helloWorldPrinter; \

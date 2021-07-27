@@ -178,7 +178,7 @@ func TestNew(t *testing.T) {
 			name: "2",
 			args: args{2, -math.MaxFloat64},
 			want: Rectangle{2, -math.MaxFloat64},
-		},		{
+		}, {
 			name: "2",
 			args: args{0, -0},
 			want: Rectangle{0, -0},

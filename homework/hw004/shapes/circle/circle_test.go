@@ -108,21 +108,20 @@ func TestCircle_String(t *testing.T) {
 		want   string
 	}{
 		{
-			name:    "1",
-			fields:  fields{12.00},
-			want:    "Circle: Radius 12.00",
+			name:   "1",
+			fields: fields{12.00},
+			want:   "Circle: Radius 12.00",
 		},
 		{
-			name:    "2",
-			fields:  fields{Radius: 0.00},
-			want:    "Circle: Radius 0.00",
+			name:   "2",
+			fields: fields{Radius: 0.00},
+			want:   "Circle: Radius 0.00",
 		},
 		{
-			name:    "3",
-			fields:  fields{Radius: -10},
-			want:    "Circle: Radius -10.00",
+			name:   "3",
+			fields: fields{Radius: -10},
+			want:   "Circle: Radius -10.00",
 		},
-
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
