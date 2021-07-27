@@ -9,7 +9,7 @@ func main() {
 	s.Run()
 }
 
-// please let me leave these comments stay as curl usage reference =)
+// please let me leave these comments here as curl usage reference =)
 
 /*
 go s.Run()
