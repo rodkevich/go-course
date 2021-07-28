@@ -15,13 +15,7 @@ func DescribeShape(s shapes.Shaper) {
 }
 
 func main() {
-	// choose your own dimensions
-	// c := circle.Circle{Radius: 8}
-	// r := rectangle.Rectangle{
-	// 	Height: 9,
-	// 	Width:  3,
-	// }
-
+	// choose your dimensions
 	c := circle.New(12)
 	r := rectangle.New(7, 6)
 
