@@ -9,7 +9,7 @@ import (
 
 type echoServer struct {
 	Address     string
-	SomePrivate string
+	somePrivate string
 }
 
 // EchoServer server command interface
@@ -22,7 +22,7 @@ type EchoServer interface {
 func NewEchoServer(address string) EchoServer {
 	return echoServer{
 		Address:     address,
-		SomePrivate: "localhost:5000",
+		somePrivate: "some_private_info",
 	}
 }
 

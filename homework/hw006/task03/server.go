@@ -17,6 +17,7 @@ const (
 type webServer struct {
 	Address string
 	output  func(w io.Writer, a ...interface{}) (n int, err error)
+	log func (v ...interface{})
 }
 
 // NewWebServer constructor for instance
@@ -24,6 +25,7 @@ func NewWebServer() *webServer {
 	return &webServer{
 		Address: address,
 		output:  fmt.Fprintln,
+		log:log.Println,
 	}
 }
 
@@ -46,26 +48,27 @@ func (s webServer) solutionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s webServer) processPostMSG(w http.ResponseWriter, r *http.Request) {
-	log.Println("POST from", r.RemoteAddr)
-	if err := r.ParseForm(); err != nil {
-		fmt.Fprintf(w, "ParseForm() err: %v", err)
+	s.log("POST from", r.RemoteAddr)
+	err := r.ParseForm()
+	if err != nil {
+		s.output(w, "ParseForm() err: %v", err)
 		return
 	}
 	name := r.FormValue("name")
 	adr := r.FormValue("address")
-	hC := http.Cookie{
+	token := http.Cookie{
 		Name:  "token",
 		Value: name + ":" + adr,
 	}
 	if name != "" && adr != "" {
-		http.SetCookie(w, &hC)
-		log.Println("http.SetCookie:", &hC)
+		http.SetCookie(w, &token)
+		s.log("http.SetCookie:", &token)
 	}
-	log.Println("redirected to /")
+	s.log("redirected to /")
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func (s webServer) processGetMSG(w http.ResponseWriter, r *http.Request) {
-	log.Println("GET from", r.RemoteAddr)
+	s.log("GET from", r.RemoteAddr)
 	http.ServeFile(w, r, indexPath)
 }
