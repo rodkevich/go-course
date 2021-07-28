@@ -6,24 +6,21 @@ import (
 )
 
 func TestUsedArgsIncludeInvalid(t *testing.T) {
-	type args struct {
-		args []float64
-	}
 	tests := []struct {
 		name  string
-		args  args
+		args []float64
 		wantB bool
 	}{
-		{"nil", args{nil}, true},
-		{"empty []", args{[]float64{}}, true},
-		{"first 0 & pos", args{[]float64{0, math.MaxFloat64}}, true},
-		{"first neg & 0", args{[]float64{-math.MaxFloat64, 0}}, true},
-		{"first pos & -0", args{[]float64{43, -0}}, true},
-		{"pos & pos", args{[]float64{1, 1}}, false},
+		{"nil", nil, true},
+		{"empty []", []float64{}, true},
+		{"first 0 & pos", []float64{0, math.MaxFloat64}, true},
+		{"first neg & 0", []float64{-math.MaxFloat64, 0}, true},
+		{"first pos & -0", []float64{43, -0}, true},
+		{"pos & pos", []float64{1, 1}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotB := UsedArgsIncludeInvalid(tt.args.args); gotB != tt.wantB {
+			if gotB := UsedArgsIncludeInvalid(tt.args); gotB != tt.wantB {
 				t.Errorf("UsedArgsIncludeInvalid() = %v, want %v", gotB, tt.wantB)
 			}
 		})
