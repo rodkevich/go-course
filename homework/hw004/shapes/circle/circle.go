@@ -1,7 +1,6 @@
 package circle
 
 import (
-	"errors"
 	"fmt"
 	"math"
 
@@ -20,7 +19,7 @@ func New(radius float64) Circle {
 // Area S=πR²
 func (c Circle) Area() (float64, error) {
 	if h.UsedArgsIncludeInvalid([]float64{c.Radius}) {
-		return 0, errors.New(h.UsingInvalidArgs)
+		return 0, h.ErrInvalidArgs
 	}
 	return math.Pi * math.Pow(c.Radius, 2), nil
 }
@@ -28,7 +27,7 @@ func (c Circle) Area() (float64, error) {
 // Perimeter P=2πR
 func (c Circle) Perimeter() (float64, error) {
 	if h.UsedArgsIncludeInvalid([]float64{c.Radius}) {
-		return 0, errors.New(h.UsingInvalidArgs)
+		return 0, h.ErrInvalidArgs
 	}
 	return 2 * math.Pi * c.Radius, nil
 }

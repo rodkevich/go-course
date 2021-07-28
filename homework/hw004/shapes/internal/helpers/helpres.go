@@ -1,10 +1,13 @@
 package helpers
 
-import "math"
+import (
+	"errors"
+	"math"
+)
 
-// UsingInvalidArgs ...
-// 	to use if args u get do not satisfy requirements
-const UsingInvalidArgs = "error: vars must be positive and != 0"
+// ErrInvalidArgs ...
+// 	to return as error if args u get do not satisfy requirements
+var ErrInvalidArgs = errors.New("error: vars must be positive and != 0")
 
 // UsedArgsIncludeInvalid ...
 // 	Returns true if one of arguments is:

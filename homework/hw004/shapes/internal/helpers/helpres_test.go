@@ -8,7 +8,7 @@ import (
 func TestUsedArgsIncludeInvalid(t *testing.T) {
 	tests := []struct {
 		name  string
-		args []float64
+		args  []float64
 		wantB bool
 	}{
 		{"nil", nil, true},
