@@ -9,7 +9,7 @@ import (
 // MultiplyOrUpperDepOfType
 // 	Checks input if it’s an int, if true - returns input multiplied by 2
 // 	If it’s not an integer, return uppercase input string
-func MultiplyOrUpperDepOfType(items []string) (rtn []string) {
+func MultiplyOrUpperDepOfType(items ...string) (rtn []string) {
 	for i := 0; i < len(items); i++ {
 		if _, errAtoi := strconv.Atoi(items[i]); errAtoi == nil {
 			fmt.Printf("%q was treated as a number\n", items[i])

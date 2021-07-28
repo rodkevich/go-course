@@ -38,7 +38,7 @@ func (s listenServer) procByteItemsFromStdin(w http.ResponseWriter, r *http.Requ
 	}
 	items := strings.Split(string(rb), `\n`)
 
-	rtn := helpers.MultiplyOrUpperDepOfType(items)
+	rtn := helpers.MultiplyOrUpperDepOfType(items...)
 	s.output(w, "Result:", rtn)
 }
 

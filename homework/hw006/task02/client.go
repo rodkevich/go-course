@@ -17,6 +17,12 @@ type clientCLI struct {
 	printer func(w io.Writer, a ...interface{}) (n int, err error)
 }
 
+// Client to work from CLI
+type Client interface {
+	makeCallToServer([]byte)
+	Start()
+}
+
 // NewClient constructor function
 func NewClient(address string) Client {
 	return clientCLI{
@@ -26,12 +32,6 @@ func NewClient(address string) Client {
 		},
 		printer: fmt.Fprintln,
 	}
-}
-
-// Client to work from CLI
-type Client interface {
-	makeCallToServer([]byte)
-	Start()
 }
 
 // makeCallToServer function connects and requests remote
