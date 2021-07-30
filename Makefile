@@ -85,6 +85,12 @@ create-homework-dirs:
 		touch hw$${LESSON_NUMBER}/test/hw$${LESSON_NUMBER}/hw-$${LESSON_NUMBER}_test.go; \
 		touch hw$${LESSON_NUMBER}/docs/hw$${LESSON_NUMBER}/hw-$${LESSON_NUMBER}_notes.yml; \
 
+proto-gen-users:
+	@echo "--> Generating gRPC clients"
+	protoc -I ./homework/hw007/api/v1 users.proto \
+		--go_out=,paths=source_relative:./homework/hw007/users \
+		--go-grpc_out=,paths=source_relative:./homework/hw007/users
+
 lint:
 	revive -formatter stylish ./... ;\
 	golangci-lint run  ./...

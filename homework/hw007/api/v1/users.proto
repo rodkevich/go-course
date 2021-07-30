@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package users;
+
+option go_package = "github.com/rodkevich/go-course/homework/hw007/users/api/v1/users";
+
+service Register {
+  rpc Register(RegisterRequest) returns (RegisterResponse){}
+}
+
+message RegisterRequest {
+  string nickname = 1;
+  string text = 2;
+}
+
+message RegisterResponse {
+  string id = 1;
+  string name = 2;
+  string text = 3;
+}
+
+service List {
+  rpc List(ListRequest) returns (ListResponse){}
+}
+
+message ListRequest {
+  string id = 1;
+  string name = 2;
+  string text = 3;
+}
+
+message ListResponse {
+  string id = 1;
+  string name = 2;
+  string text = 3;
+}
