@@ -1,4 +1,5 @@
 package users
+
 //
 // import (
 // 	"github.com/stretchr/testify/require"

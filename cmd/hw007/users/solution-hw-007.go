@@ -16,13 +16,13 @@ func main() {
 	srv.InitDb()
 	users.RegisterRegisterServer(s, srv)
 	users.RegisterListServer(s, srv)
-	l, err := net.Listen("tcp", ":9090")
+	listener, err := net.Listen("tcp", ":9090")
 
 	fmt.Println("Server is running")
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := s.Serve(l); err != nil {
+	if err := s.Serve(listener); err != nil {
 		log.Fatal(err)
 	}
 }

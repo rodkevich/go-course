@@ -2,7 +2,13 @@ package users
 
 import (
 	"context"
+	"errors"
+	"strings"
+	"sync"
 )
+
+var errNotFound = errors.New("not found")
+var errDuplicate = errors.New("name exists in DB")
 
 // User ..
 type User struct {
@@ -12,7 +18,8 @@ type User struct {
 
 // Db ...
 type Db struct {
-	Users map[uint64]User
+	Users  map[uint64]User
+	locker sync.RWMutex
 }
 
 // NewDb ...
@@ -48,8 +55,14 @@ func (s *GRPCServer) InitDb() {
 
 // Register ...
 func (s *GRPCServer) Register(ctx context.Context, req *RegisterRequest) (resp *RegisterResponse, err error) {
-
-	var newUserID uint64 = s.db.getNewUserID()
+	s.db.locker.RLock()
+	defer s.db.locker.RUnlock()
+	for _, u := range s.db.Users {
+		if strings.EqualFold(u.UniqueName, req.Name) {
+			return nil, errDuplicate
+		}
+	}
+	var newUserID = s.db.getNewUserID()
 	newUser := User{
 		UserID:     newUserID,
 		UniqueName: req.Name,
@@ -64,5 +77,19 @@ func (s *GRPCServer) Register(ctx context.Context, req *RegisterRequest) (resp *
 
 // List ...
 func (s *GRPCServer) List(ctx context.Context, req *ListRequest) (resp *ListResponse, err error) {
-	return
+	s.db.locker.RLock()
+	defer s.db.locker.RUnlock()
+	if len(s.db.Users) == 0 {
+		return nil, errNotFound
+	}
+	var rtn []*ListResponse_Result
+	for _, user := range s.db.Users {
+		rtn = append(rtn, &ListResponse_Result{
+			Id:   user.UserID,
+			Name: user.UniqueName,
+		})
+	}
+	return &ListResponse{
+		Results: rtn,
+	}, nil
 }
