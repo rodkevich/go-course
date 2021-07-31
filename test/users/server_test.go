@@ -1,39 +1,39 @@
 package users
-
-import (
-	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
-	"io/ioutil"
-	"net"
-	"testing"
-
-	api "github.com/rodkevich/go-course/homework/hw007/users"
-)
-
-func TestServer(t *testing.T) {
-	for scenario, fn := range map[string]func(
-		t *testing.T,
-		client api.LogClient,
-		config *Config,
-	){
-		"produce/consume a message ":      testProduceConsume,
-		"produce/consume stream succeeds": testProduceConsumeStream,
-	} {
-		t.Run(scenario, func(t *testing.T) {
-			client, config, teardown := setupTest(t, nil)
-			defer teardown()
-			fn(t, client, config)
-		})
-	}
-}
-
-func testProduceConsume(t *testing.T, client interface{}, config *interface{}) {
-
-}
-
-func testProduceConsumeStream(t *testing.T, client interface{}, config *interface{}) {
-
-}
+//
+// import (
+// 	"github.com/stretchr/testify/require"
+// 	"google.golang.org/grpc"
+// 	"io/ioutil"
+// 	"net"
+// 	"testing"
+//
+// 	api "github.com/rodkevich/go-course/homework/hw007/users"
+// )
+//
+// func TestServer(t *testing.T) {
+// 	for scenario, fn := range map[string]func(
+// 		t *testing.T,
+// 		client api.LogClient,
+// 		config *Config,
+// 	){
+// 		"produce/consume a message ":      testProduceConsume,
+// 		"produce/consume stream succeeds": testProduceConsumeStream,
+// 	} {
+// 		t.Run(scenario, func(t *testing.T) {
+// 			client, config, teardown := setupTest(t, nil)
+// 			defer teardown()
+// 			fn(t, client, config)
+// 		})
+// 	}
+// }
+//
+// func testProduceConsume(t *testing.T, client interface{}, config *interface{}) {
+//
+// }
+//
+// func testProduceConsumeStream(t *testing.T, client interface{}, config *interface{}) {
+//
+// }
 //
 // func setupTest(t *testing.T, fn func(*Config)) (
 // 	client api.LogClient,

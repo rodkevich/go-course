@@ -9,14 +9,13 @@ service Register {
 }
 
 message RegisterRequest {
-  string nickname = 1;
-  string text = 2;
+  string name = 1;
 }
 
 message RegisterResponse {
-  string id = 1;
+  uint64 id = 1;
   string name = 2;
-  string text = 3;
+  string message = 3;
 }
 
 service List {
@@ -24,13 +23,14 @@ service List {
 }
 
 message ListRequest {
-  string id = 1;
+  uint64 id = 1;
   string name = 2;
-  string text = 3;
 }
 
 message ListResponse {
-  string id = 1;
-  string name = 2;
-  string text = 3;
+  message Result {
+    uint64 id = 1;
+    string name = 2;
+  }
+  repeated Result results = 1;
 }

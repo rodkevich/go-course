@@ -13,11 +13,10 @@ import (
 func main() {
 	s := grpc.NewServer()
 	srv := &users.GRPCServer{}
+	srv.InitDb()
 	users.RegisterRegisterServer(s, srv)
 	users.RegisterListServer(s, srv)
 	l, err := net.Listen("tcp", ":9090")
-
-	err = initDataBase(err)
 
 	fmt.Println("Server is running")
 	if err != nil {
@@ -26,8 +25,4 @@ func main() {
 	if err := s.Serve(l); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func initDataBase(err error) error {
-	return nil
 }
