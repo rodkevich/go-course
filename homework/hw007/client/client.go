@@ -2,26 +2,45 @@ package client
 
 import (
 	"context"
+	"github.com/rodkevich/go-course/homework/hw007/internal/constants"
+
 	"github.com/rodkevich/go-course/homework/hw007/users"
-	"github.com/urfave/cli"
 	"google.golang.org/grpc"
-	"log"
 )
 
-func register(c *cli.Context) error {
-	opts := []grpc.DialOption{grpc.WithInsecure()} // disable tls
-	conn, err := grpc.Dial(c.String(users.ServerAddress), opts...)
-	if err != nil {
-		panic(err)
-	}
-	defer conn.Close()
-	client := users.NewListClient(conn)
-	stream, err := client.List(context.Background(), &users.ListRequest{}, nil)
-	if err != nil {
-		panic(err)
-	}
-	results := stream.GetResults()
-	log.Println(results)
+var ctx = context.Background()
 
-	return nil
+// Client ...
+type Client struct {
+	Conn *grpc.ClientConn
+}
+
+// NewClient for grpc server
+func NewClient() *Client {
+	opts := []grpc.DialOption{grpc.WithInsecure()} // disable tls
+	conn, err := grpc.Dial(constants.ServerAddress, opts...)
+	if err != nil {
+		panic(err)
+	}
+	return &Client{Conn: conn}
+}
+
+// Registration for new person in fake db
+func (c *Client) Registration(req *users.RegistrationRequest) (string, error) {
+	client := users.NewRegistrationClient(c.Conn)
+	reg, err := client.Registration(ctx, req)
+	if err != nil {
+		panic(err)
+	}
+	return reg.GetMessage(), nil
+}
+
+// List all persons from fake db
+func (c Client) List(req *users.ListRequest) (*users.ListResponse, error) {
+	client := users.NewListClient(c.Conn)
+	usersList, err := client.List(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return usersList, nil
 }

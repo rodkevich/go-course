@@ -14,86 +14,86 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// RegisterClient is the client API for Register service.
+// RegistrationClient is the client API for Registration service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type RegisterClient interface {
-	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+type RegistrationClient interface {
+	Registration(ctx context.Context, in *RegistrationRequest, opts ...grpc.CallOption) (*RegistrationResponse, error)
 }
 
-type registerClient struct {
+type registrationClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewRegisterClient(cc grpc.ClientConnInterface) RegisterClient {
-	return &registerClient{cc}
+func NewRegistrationClient(cc grpc.ClientConnInterface) RegistrationClient {
+	return &registrationClient{cc}
 }
 
-func (c *registerClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
-	out := new(RegisterResponse)
-	err := c.cc.Invoke(ctx, "/users.Register/Register", in, out, opts...)
+func (c *registrationClient) Registration(ctx context.Context, in *RegistrationRequest, opts ...grpc.CallOption) (*RegistrationResponse, error) {
+	out := new(RegistrationResponse)
+	err := c.cc.Invoke(ctx, "/users.Registration/Registration", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// RegisterServer is the server API for Register service.
-// All implementations must embed UnimplementedRegisterServer
+// RegistrationServer is the server API for Registration service.
+// All implementations must embed UnimplementedRegistrationServer
 // for forward compatibility
-type RegisterServer interface {
-	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
-	mustEmbedUnimplementedRegisterServer()
+type RegistrationServer interface {
+	Registration(context.Context, *RegistrationRequest) (*RegistrationResponse, error)
+	mustEmbedUnimplementedRegistrationServer()
 }
 
-// UnimplementedRegisterServer must be embedded to have forward compatible implementations.
-type UnimplementedRegisterServer struct {
+// UnimplementedRegistrationServer must be embedded to have forward compatible implementations.
+type UnimplementedRegistrationServer struct {
 }
 
-func (UnimplementedRegisterServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+func (UnimplementedRegistrationServer) Registration(context.Context, *RegistrationRequest) (*RegistrationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Registration not implemented")
 }
-func (UnimplementedRegisterServer) mustEmbedUnimplementedRegisterServer() {}
+func (UnimplementedRegistrationServer) mustEmbedUnimplementedRegistrationServer() {}
 
-// UnsafeRegisterServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to RegisterServer will
+// UnsafeRegistrationServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to RegistrationServer will
 // result in compilation errors.
-type UnsafeRegisterServer interface {
-	mustEmbedUnimplementedRegisterServer()
+type UnsafeRegistrationServer interface {
+	mustEmbedUnimplementedRegistrationServer()
 }
 
-func RegisterRegisterServer(s grpc.ServiceRegistrar, srv RegisterServer) {
-	s.RegisterService(&Register_ServiceDesc, srv)
+func RegisterRegistrationServer(s grpc.ServiceRegistrar, srv RegistrationServer) {
+	s.RegisterService(&Registration_ServiceDesc, srv)
 }
 
-func _Register_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterRequest)
+func _Registration_Registration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegistrationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RegisterServer).Register(ctx, in)
+		return srv.(RegistrationServer).Registration(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/users.Register/Register",
+		FullMethod: "/users.Registration/Registration",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RegisterServer).Register(ctx, req.(*RegisterRequest))
+		return srv.(RegistrationServer).Registration(ctx, req.(*RegistrationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Register_ServiceDesc is the grpc.ServiceDesc for Register service.
+// Registration_ServiceDesc is the grpc.ServiceDesc for Registration service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Register_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "users.Register",
-	HandlerType: (*RegisterServer)(nil),
+var Registration_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "users.Registration",
+	HandlerType: (*RegistrationServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Register",
-			Handler:    _Register_Register_Handler,
+			MethodName: "Registration",
+			Handler:    _Registration_Registration_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

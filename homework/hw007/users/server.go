@@ -3,29 +3,28 @@ package users
 import (
 	"context"
 	"errors"
+	"github.com/rodkevich/go-course/homework/hw007/internal/constants"
+	"net"
 	"strings"
 	"sync"
 )
 
-// ServerAddress ...
-const ServerAddress = "127.0.0.1:9090"
-
 var errNotFound = errors.New("not found")
 var errDuplicate = errors.New("name exists in DB")
 
-// User ..
+// User represents persons in app
 type User struct {
-	UserID     uint64 `json:"user_id,omitempty"`
-	UniqueName string `json:"unique_name,omitempty"`
+	UserID     uint64 `json:"user_id"`
+	UniqueName string `json:"unique_name"`
 }
 
-// Db ...
+// Db stores persons for app
 type Db struct {
 	locker sync.RWMutex
 	Users  map[uint64]User
 }
 
-// newDb ...
+// newDb constructs new instance of fake-db
 func newDb() (*Db, error) {
 	d := Db{
 		Users: map[uint64]User{},
@@ -43,24 +42,24 @@ func (db *Db) getNewUserID() (rtn uint64) {
 	return rtn
 }
 
-// GRPCServer ...
+// GRPCServer base type
 type GRPCServer struct {
 	Address string
-	UnimplementedRegisterServer
+	UnimplementedRegistrationServer
 	UnimplementedListServer
 	db *Db
 }
 
-// InitDb ...
+// InitDb method for initialising of new fake-db
 func (s *GRPCServer) InitDb() error {
 	db, _ := newDb()
 	s.db = db
-	s.Address = ServerAddress
+	s.Address = constants.ServerAddress
 	return nil
 }
 
-// Register ...
-func (s *GRPCServer) Register(ctx context.Context, req *RegisterRequest) (resp *RegisterResponse, err error) {
+// Registration for new person
+func (s *GRPCServer) Registration(_ context.Context, req *RegistrationRequest) (resp *RegistrationResponse, err error) {
 	s.db.locker.RLock()
 	defer s.db.locker.RUnlock()
 	for _, u := range s.db.Users {
@@ -74,28 +73,33 @@ func (s *GRPCServer) Register(ctx context.Context, req *RegisterRequest) (resp *
 		UniqueName: req.Name,
 	}
 	s.db.Users[newUserID] = newUser
-	return &RegisterResponse{
+	return &RegistrationResponse{
 		Id:      newUserID,
 		Name:    req.Name,
-		Message: "ok, user registered",
+		Message: "ok, " + req.Name + " - successfully registered",
 	}, nil
 }
 
-// List ...
-func (s *GRPCServer) List(ctx context.Context, req *ListRequest) (resp *ListResponse, err error) {
+// List existing persons
+func (s *GRPCServer) List(context.Context, *ListRequest) (resp *ListResponse, err error) {
 	s.db.locker.RLock()
 	defer s.db.locker.RUnlock()
 	if len(s.db.Users) == 0 {
 		return nil, errNotFound
 	}
-	var rtn []*ListResponse_Result
+	var rtn []*ListResponse_User
 	for _, user := range s.db.Users {
-		rtn = append(rtn, &ListResponse_Result{
+		rtn = append(rtn, &ListResponse_User{
 			Id:   user.UserID,
 			Name: user.UniqueName,
 		})
 	}
 	return &ListResponse{
-		Results: rtn,
+		Users: rtn,
 	}, nil
+}
+
+// Run start a server
+func (s *GRPCServer) Run() (net.Listener, error) {
+	return net.Listen("tcp", constants.ServerAddress)
 }

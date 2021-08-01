@@ -4,15 +4,15 @@ package users;
 
 option go_package = "github.com/rodkevich/go-course/homework/hw007/users/api/v1/users";
 
-service Register {
-  rpc Register(RegisterRequest) returns (RegisterResponse){}
+service Registration {
+  rpc Registration(RegistrationRequest) returns (RegistrationResponse){}
 }
 
-message RegisterRequest {
+message RegistrationRequest {
   string name = 1;
 }
 
-message RegisterResponse {
+message RegistrationResponse {
   uint64 id = 1;
   string name = 2;
   string message = 3;
@@ -26,9 +26,9 @@ message ListRequest {
 }
 
 message ListResponse {
-  message Result {
+  message User {
     uint64 id = 1;
     string name = 2;
   }
-  repeated Result results = 1;
+  repeated User users = 2;
 }
