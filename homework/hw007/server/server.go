@@ -1,58 +1,28 @@
-package users
+package server
 
 import (
 	"context"
 	"errors"
 	"github.com/rodkevich/go-course/homework/hw007/internal/constants"
+	"github.com/rodkevich/go-course/homework/hw007/repository"
 	"net"
 	"strings"
-	"sync"
 )
 
 var errNotFound = errors.New("not found")
 var errDuplicate = errors.New("name exists in DB")
-
-// User represents persons in app
-type User struct {
-	UserID     uint64 `json:"user_id"`
-	UniqueName string `json:"unique_name"`
-}
-
-// Db stores persons for app
-type Db struct {
-	locker sync.RWMutex
-	Users  map[uint64]User
-}
-
-// newDb constructs new instance of fake-db
-func newDb() (*Db, error) {
-	d := Db{
-		Users: map[uint64]User{},
-	}
-	return &d, nil
-}
-
-func (db *Db) getNewUserID() (rtn uint64) {
-	for i := range db.Users {
-		if rtn < i {
-			rtn = i
-		}
-	}
-	rtn++
-	return rtn
-}
 
 // GRPCServer base type
 type GRPCServer struct {
 	Address string
 	UnimplementedRegistrationServer
 	UnimplementedListServer
-	db *Db
+	db *repository.Db
 }
 
 // InitDb method for initialising of new fake-db
 func (s *GRPCServer) InitDb() error {
-	db, _ := newDb()
+	db, _ := repository.NewDb()
 	s.db = db
 	s.Address = constants.ServerAddress
 	return nil
@@ -60,15 +30,15 @@ func (s *GRPCServer) InitDb() error {
 
 // Registration for new person
 func (s *GRPCServer) Registration(_ context.Context, req *RegistrationRequest) (resp *RegistrationResponse, err error) {
-	s.db.locker.RLock()
-	defer s.db.locker.RUnlock()
+	s.db.Locker.RLock()
+	defer s.db.Locker.RUnlock()
 	for _, u := range s.db.Users {
 		if strings.EqualFold(u.UniqueName, req.Name) {
 			return nil, errDuplicate
 		}
 	}
-	var newUserID = s.db.getNewUserID()
-	newUser := User{
+	var newUserID = s.db.GetNewUserID()
+	newUser := repository.User{
 		UserID:     newUserID,
 		UniqueName: req.Name,
 	}
@@ -82,8 +52,8 @@ func (s *GRPCServer) Registration(_ context.Context, req *RegistrationRequest) (
 
 // List existing persons
 func (s *GRPCServer) List(context.Context, *ListRequest) (resp *ListResponse, err error) {
-	s.db.locker.RLock()
-	defer s.db.locker.RUnlock()
+	s.db.Locker.RLock()
+	defer s.db.Locker.RUnlock()
 	if len(s.db.Users) == 0 {
 		return nil, errNotFound
 	}
