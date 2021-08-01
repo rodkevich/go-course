@@ -18,16 +18,16 @@ type User struct {
 
 // Db ...
 type Db struct {
-	Users  map[uint64]User
 	locker sync.RWMutex
+	Users  map[uint64]User
 }
 
-// NewDb ...
-func NewDb() (Db, error) {
+// newDb ...
+func newDb() (*Db, error) {
 	d := Db{
 		Users: map[uint64]User{},
 	}
-	return d, nil
+	return &d, nil
 }
 
 func (db *Db) getNewUserID() (rtn uint64) {
@@ -49,8 +49,8 @@ type GRPCServer struct {
 
 // InitDb ...
 func (s *GRPCServer) InitDb() {
-	db, _ := NewDb()
-	s.db = &db
+	db, _ := newDb()
+	s.db = db
 }
 
 // Register ...
