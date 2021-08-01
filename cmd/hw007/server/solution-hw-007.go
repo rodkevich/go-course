@@ -13,16 +13,28 @@ import (
 func main() {
 	s := grpc.NewServer()
 	srv := &users.GRPCServer{}
-	srv.InitDb()
+	if err := srv.InitDb(); err != nil {
+		log.Fatal(err)
+	}
 	users.RegisterRegisterServer(s, srv)
 	users.RegisterListServer(s, srv)
-	listener, err := net.Listen("tcp", ":9090")
+	listener, err := net.Listen("tcp", users.ServerAddress)
 
 	fmt.Println("Server is running")
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	if err := s.Serve(listener); err != nil {
 		log.Fatal(err)
 	}
+
+	// go func() {
+	// 	if err := s.Serve(listener); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }()
+	//
+	// cli := users.NewListClient()
+	// }
 }

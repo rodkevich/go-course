@@ -7,6 +7,9 @@ import (
 	"sync"
 )
 
+// ServerAddress ...
+const ServerAddress = "127.0.0.1:9090"
+
 var errNotFound = errors.New("not found")
 var errDuplicate = errors.New("name exists in DB")
 
@@ -42,15 +45,18 @@ func (db *Db) getNewUserID() (rtn uint64) {
 
 // GRPCServer ...
 type GRPCServer struct {
+	Address string
 	UnimplementedRegisterServer
 	UnimplementedListServer
 	db *Db
 }
 
 // InitDb ...
-func (s *GRPCServer) InitDb() {
+func (s *GRPCServer) InitDb() error {
 	db, _ := newDb()
 	s.db = db
+	s.Address = ServerAddress
+	return nil
 }
 
 // Register ...
