@@ -3,9 +3,9 @@ package client
 import (
 	"context"
 	"github.com/rodkevich/go-course/homework/hw007/api/v1/users"
-	"github.com/rodkevich/go-course/homework/hw007/internal/constants"
 	"google.golang.org/grpc"
 )
+const serverAddress = "127.0.0.1:9090"
 
 var ctx = context.Background()
 
@@ -17,7 +17,7 @@ type Client struct {
 // NewClient for grpc server
 func NewClient() *Client {
 	opts := []grpc.DialOption{grpc.WithInsecure()} // disable tls
-	conn, err := grpc.Dial(constants.ServerAddress, opts...)
+	conn, err := grpc.Dial(serverAddress, opts...)
 	if err != nil {
 		panic(err)
 	}

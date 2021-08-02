@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/rodkevich/go-course/homework/hw007/api/v1/users"
-	"github.com/rodkevich/go-course/homework/hw007/internal/constants"
 	"github.com/rodkevich/go-course/homework/hw007/pkg/repository"
 	"github.com/rodkevich/go-course/homework/hw007/pkg/repository/fakedb"
 )
+const serverAddress = "127.0.0.1:9090"
 
 var errNotFound = errors.New("not found")
 var errDuplicate = errors.New("name exists in DB")
@@ -27,7 +27,7 @@ type GRPCServer struct {
 func (s *GRPCServer) InitDb() error {
 	db, _ := fakedb.NewDb()
 	s.db = db
-	s.Address = constants.ServerAddress
+	s.Address = serverAddress
 	return nil
 }
 
@@ -74,5 +74,5 @@ func (s *GRPCServer) List(context.Context, *users.ListRequest) (resp *users.List
 
 // Run start a server
 func (s *GRPCServer) Run() (net.Listener, error) {
-	return net.Listen("tcp", constants.ServerAddress)
+	return net.Listen("tcp", serverAddress)
 }
