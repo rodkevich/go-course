@@ -18,7 +18,7 @@ func startApp(address string) {
 
 	grpcUsersServer := &server.GRPCServer{}
 	// init fake database
-	if err := grpcUsersServer.InitDb(); err != nil {
+	if err := grpcUsersServer.InitFakeDb(); err != nil {
 		log.Fatal(err)
 	}
 	// register services

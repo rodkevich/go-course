@@ -8,7 +8,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-var ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
 
 // Client ...
 type Client struct {
@@ -27,6 +26,7 @@ func NewClient(address string) *Client {
 
 // Registration for new person in fake db
 func (c *Client) Registration(req *users.RegistrationRequest) (string, error) {
+	var ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	client := users.NewRegistrationClient(c.Conn)
@@ -39,6 +39,7 @@ func (c *Client) Registration(req *users.RegistrationRequest) (string, error) {
 
 // List all persons from fake db
 func (c Client) List(req *users.ListRequest) (*users.ListResponse, error) {
+	var ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	client := users.NewListClient(c.Conn)

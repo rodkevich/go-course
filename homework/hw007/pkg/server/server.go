@@ -3,47 +3,50 @@ package server
 import (
 	"context"
 	"errors"
+	"github.com/rodkevich/go-course/homework/hw007/api/v1/users"
+	repo "github.com/rodkevich/go-course/homework/hw007/pkg/repository"
+	"github.com/rodkevich/go-course/homework/hw007/pkg/repository/fakedb"
 	"net"
 	"strings"
-
-	"github.com/rodkevich/go-course/homework/hw007/api/v1/users"
-	"github.com/rodkevich/go-course/homework/hw007/pkg/repository"
-	"github.com/rodkevich/go-course/homework/hw007/pkg/repository/fakedb"
 )
 
 var errNotFound = errors.New("not found")
 var errDuplicate = errors.New("name exists in DB")
+var errInitFakeDb = errors.New("DB was not initialized")
 
 // GRPCServer base type
 type GRPCServer struct {
 	users.UnimplementedRegistrationServer
 	users.UnimplementedListServer
-	db *fakedb.Db
+	db repo.Repository
 }
 
-// InitDb method for initialising of new fake-db
-func (s *GRPCServer) InitDb() error {
-	db, _ := fakedb.NewDb()
+// InitFakeDb method for initialising of new fake-db
+func (s *GRPCServer) InitFakeDb() error {
+	db, err := fakedb.NewDb()
+	if err != nil {
+		return errInitFakeDb
+	}
 	s.db = db
 	return nil
 }
 
 // Registration for new person
 func (s *GRPCServer) Registration(ctx context.Context, req *users.RegistrationRequest) (resp *users.RegistrationResponse, err error) {
-	s.db.Locker.RLock()
-	defer s.db.Locker.RUnlock()
+	s.db.Lock()
+	defer s.db.Unlock()
 
-	for _, u := range s.db.Users {
+	for _, u := range s.db.GetAllUsers() {
 		if strings.EqualFold(u.UniqueName, req.Name) {
 			return nil, errDuplicate
 		}
 	}
 	var newUserID = s.db.GetNewUserID()
-	newUser := repository.User{
+	newUser := repo.User{
 		UserID:     newUserID,
 		UniqueName: req.Name,
 	}
-	s.db.Users[newUserID] = newUser
+	s.db.GetAllUsers()[newUserID] = newUser
 	return &users.RegistrationResponse{
 		Id:      newUserID,
 		Name:    req.Name,
@@ -53,12 +56,13 @@ func (s *GRPCServer) Registration(ctx context.Context, req *users.RegistrationRe
 
 // List existing persons
 func (s *GRPCServer) List(context.Context, *users.ListRequest) (resp *users.ListResponse, err error) {
-
-	if len(s.db.Users) == 0 {
+	s.db.Lock()
+	defer s.db.Unlock()
+	if len(s.db.GetAllUsers()) == 0 {
 		return nil, errNotFound
 	}
 	var rtn []*users.ListResponse_User
-	for _, user := range s.db.Users {
+	for _, user := range s.db.GetAllUsers() {
 		rtn = append(rtn, &users.ListResponse_User{
 			Id:   user.UserID,
 			Name: user.UniqueName,
