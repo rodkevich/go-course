@@ -10,14 +10,12 @@ import (
 	"github.com/rodkevich/go-course/homework/hw007/pkg/repository"
 	"github.com/rodkevich/go-course/homework/hw007/pkg/repository/fakedb"
 )
-const serverAddress = "127.0.0.1:9090"
 
 var errNotFound = errors.New("not found")
 var errDuplicate = errors.New("name exists in DB")
 
 // GRPCServer base type
 type GRPCServer struct {
-	Address string
 	users.UnimplementedRegistrationServer
 	users.UnimplementedListServer
 	db *fakedb.Db
@@ -27,14 +25,14 @@ type GRPCServer struct {
 func (s *GRPCServer) InitDb() error {
 	db, _ := fakedb.NewDb()
 	s.db = db
-	s.Address = serverAddress
 	return nil
 }
 
 // Registration for new person
-func (s *GRPCServer) Registration(_ context.Context, req *users.RegistrationRequest) (resp *users.RegistrationResponse, err error) {
+func (s *GRPCServer) Registration(ctx context.Context, req *users.RegistrationRequest) (resp *users.RegistrationResponse, err error) {
 	s.db.Locker.RLock()
 	defer s.db.Locker.RUnlock()
+
 	for _, u := range s.db.Users {
 		if strings.EqualFold(u.UniqueName, req.Name) {
 			return nil, errDuplicate
@@ -55,8 +53,7 @@ func (s *GRPCServer) Registration(_ context.Context, req *users.RegistrationRequ
 
 // List existing persons
 func (s *GRPCServer) List(context.Context, *users.ListRequest) (resp *users.ListResponse, err error) {
-	s.db.Locker.RLock()
-	defer s.db.Locker.RUnlock()
+
 	if len(s.db.Users) == 0 {
 		return nil, errNotFound
 	}
@@ -73,6 +70,6 @@ func (s *GRPCServer) List(context.Context, *users.ListRequest) (resp *users.List
 }
 
 // Run start a server
-func (s *GRPCServer) Run() (net.Listener, error) {
-	return net.Listen("tcp", serverAddress)
+func (s *GRPCServer) Run(address string) (net.Listener, error) {
+	return net.Listen("tcp", address)
 }

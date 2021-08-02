@@ -1,10 +1,10 @@
 package fakedb
 
 import (
-	"github.com/rodkevich/go-course/homework/hw007/pkg/repository"
 	"sync"
-)
 
+	"github.com/rodkevich/go-course/homework/hw007/pkg/repository"
+)
 
 // Db stores persons for app
 type Db struct {

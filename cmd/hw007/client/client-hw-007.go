@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// create new client & reg some users
-	cl := client.NewClient()
+	cl := client.NewClient("127.0.0.1:9090")
 
 	persons := [3]string{"some name 1", "some name 2", "some name 3"}
 	for _, user := range persons {
