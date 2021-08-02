@@ -11,6 +11,6 @@ type User struct {
 // Repository represents the repositories for usage
 type Repository interface {
 	sync.Locker
-	GetAllUsers() map[uint64]User
+	AllUsers() map[uint64]User
 	GetNewUserID() (rtn uint64)
 }

@@ -12,12 +12,12 @@ type Db struct {
 	Storage map[uint64]repo.User
 }
 
-// Lock ...
+// Lock to prevent changing Storage
 func (db *Db) Lock() {
 	db.Locker.RLock()
 }
 
-// Unlock ...
+// Unlock to allow changing Storage
 func (db *Db) Unlock() {
 	db.Locker.RUnlock()
 }
@@ -30,14 +30,14 @@ func NewDb() (*Db, error) {
 	return &d, nil
 }
 
-// GetAllUsers return all existing users from storage
-func (db *Db) GetAllUsers() map[uint64]repo.User {
-	return db.Storage
+// AllUsers return all existing users from storage
+func (db *Db) AllUsers() map[uint64]repo.User {
+	return db.Storage  // to skip Save-like methods for now
 }
 
 // GetNewUserID ...
 func (db *Db) GetNewUserID() (rtn uint64) {
-	for i := range db.GetAllUsers() {
+	for i := range db.AllUsers() {
 		if rtn < i {
 			rtn = i
 		}

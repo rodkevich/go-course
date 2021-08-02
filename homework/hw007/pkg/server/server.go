@@ -37,7 +37,7 @@ func (s *GRPCServer) Registration(ctx context.Context, req *users.RegistrationRe
 	s.db.Lock()
 	defer s.db.Unlock()
 
-	for _, u := range s.db.GetAllUsers() {
+	for _, u := range s.db.AllUsers() {
 		if strings.EqualFold(u.UniqueName, req.Name) {
 			return nil, errDuplicate
 		}
@@ -47,7 +47,7 @@ func (s *GRPCServer) Registration(ctx context.Context, req *users.RegistrationRe
 		UserID:     newUserID,
 		UniqueName: req.Name,
 	}
-	s.db.GetAllUsers()[newUserID] = newUser
+	s.db.AllUsers()[newUserID] = newUser
 	return &users.RegistrationResponse{
 		Id:      newUserID,
 		Name:    req.Name,
@@ -59,11 +59,11 @@ func (s *GRPCServer) Registration(ctx context.Context, req *users.RegistrationRe
 func (s *GRPCServer) List(context.Context, *users.ListRequest) (resp *users.ListResponse, err error) {
 	s.db.Lock()
 	defer s.db.Unlock()
-	if len(s.db.GetAllUsers()) == 0 {
+	if len(s.db.AllUsers()) == 0 {
 		return nil, errNotFound
 	}
 	var rtn []*users.ListResponse_User
-	for _, user := range s.db.GetAllUsers() {
+	for _, user := range s.db.AllUsers() {
 		rtn = append(rtn, &users.ListResponse_User{
 			Id:   user.UserID,
 			Name: user.UniqueName,
