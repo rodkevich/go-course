@@ -1,23 +1,21 @@
-package repository
+package fakedb
 
-import "sync"
+import (
+	"github.com/rodkevich/go-course/homework/hw007/pkg/repository"
+	"sync"
+)
 
-// User represents persons in app
-type User struct {
-	UserID     uint64 `json:"user_id"`
-	UniqueName string `json:"unique_name"`
-}
 
 // Db stores persons for app
 type Db struct {
 	Locker sync.RWMutex
-	Users  map[uint64]User
+	Users  map[uint64]repository.User
 }
 
 // NewDb constructs new instance of fake-db
 func NewDb() (*Db, error) {
 	d := Db{
-		Users: map[uint64]User{},
+		Users: map[uint64]repository.User{},
 	}
 	return &d, nil
 }
