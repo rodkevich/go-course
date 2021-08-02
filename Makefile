@@ -87,13 +87,13 @@ create-homework-dirs:
 
 proto-gen-users:
 	@echo "--> Generating gRPC clients"
-	protoc -I ./homework/hw007/api/v1 users.proto \
-		--go_out=,paths=source_relative:./homework/hw007/users \
-		--go-grpc_out=,paths=source_relative:./homework/hw007/users
+	protoc -I ./homework/hw007/api/v1/users/proto users.proto \
+		--go_out=,paths=source_relative:./homework/hw007/api/v1/users \
+		--go-grpc_out=,paths=source_relative:./homework/hw007/api/v1/users
 
 proto-evans:
 	firefox -new-tab "https://github.com/ktr0731/evans"
-	evans /home/ioan/Desktop/code/src/github.com/rodkevich/go-course/homework/hw007/api/v1/users.proto -p 9090
+	# evans /home/ioan/Desktop/code/src/github.com/rodkevich/go-course/homework/hw007/api/v1/users.proto -p 9090
 
 lint:
 	revive -formatter stylish ./... ;\
