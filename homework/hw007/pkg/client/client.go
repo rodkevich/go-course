@@ -8,7 +8,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-
 // Client ...
 type Client struct {
 	Conn *grpc.ClientConn

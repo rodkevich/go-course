@@ -3,11 +3,12 @@ package server
 import (
 	"context"
 	"errors"
+	"net"
+	"strings"
+
 	"github.com/rodkevich/go-course/homework/hw007/api/v1/users"
 	repo "github.com/rodkevich/go-course/homework/hw007/pkg/repository"
 	"github.com/rodkevich/go-course/homework/hw007/pkg/repository/fakedb"
-	"net"
-	"strings"
 )
 
 var errNotFound = errors.New("not found")
