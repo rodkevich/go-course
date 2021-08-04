@@ -1,0 +1,19 @@
+Lesson_08:
+  - Take HomeWork 6 Task 3 as initial step.
+  - Create new service to store user-tokens from Web-form
+  (no need to use databases. Feel free to use map to store it).
+  - Refactor existing POST-request store tokens on new service.
+  - New service should store them as structure
+   {  token: your token,
+      createdAt: currentdate,
+      expiredAt: currentdate + 10 days}
+  - Make DockerFiles to both services
+  - Create account on docker hub.
+  - Create images, tag it, upload it on your own hub.
+  - Make Docker Compose File
+  - Commit DockerFiles and Docker Compose File in Git, open PR.
+  S- hare link with your mentors on PR and images in your own docker hub.
+  Way to success: Your app should works correct in docker container.
+
+Info:
+  - https://docs.docker.com/develop/develop-images/multistage-build/

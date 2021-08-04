@@ -1,0 +1,23 @@
+version: "2.4"
+
+services:
+  app-hw-006:
+    tty: true
+    build:
+      context: ../..
+      dockerfile: cmd/hw008/dockerfiles/DockerfileHW006
+    container_name: app-hw-006
+    hostname: app-hw-006
+    ports:
+      - "5050:5050"
+    links:
+      - app-hw-008
+  app-hw-008:
+    tty: true
+    build:
+      context: ../..
+      dockerfile: cmd/hw008/dockerfiles/Dockerfile
+    container_name: app-hw-008
+    hostname: app-hw-008
+    ports:
+      - "5051:5051"

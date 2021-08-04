@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	address   = "127.0.0.1:5050"
+	address   = ":5050"
 	indexPath = "./static/index.html"
 )
 
@@ -31,7 +31,7 @@ func NewWebServer() *webServer {
 
 // Run start a new server instance
 func (s webServer) Run() {
-	fmt.Println("Using ", address)
+	fmt.Println("Using localhost", address)
 	r := mux.NewRouter()
 	r.HandleFunc("/", s.solutionHandler).Methods("GET", "POST")
 	http.Handle("/", r)
@@ -65,10 +65,12 @@ func (s webServer) processPostMSG(w http.ResponseWriter, r *http.Request) {
 		s.log("http.SetCookie:", &token)
 	}
 	s.log("redirected to /")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func (s webServer) processGetMSG(w http.ResponseWriter, r *http.Request) {
 	s.log("GET from", r.RemoteAddr)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	http.ServeFile(w, r, indexPath)
 }
