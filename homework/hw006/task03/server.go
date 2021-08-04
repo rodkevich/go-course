@@ -67,7 +67,7 @@ func (s *WebServer) handlePostMSG(w http.ResponseWriter, r *http.Request) {
 				s.Log("Shit happens:", err)
 				return
 			}
-			s.Log("Request was send:", r)
+			s.Log("Request was sent:", r)
 			return
 		}
 		s.Log("Nothing was send: no token was generated")
