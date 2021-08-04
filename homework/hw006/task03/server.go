@@ -34,7 +34,7 @@ type WebServer struct {
 
 // Token ...
 type Token struct {
-	Name      string    `json:"token"`
+	Token     string    `json:"token"`
 	CreatedAt time.Time `json:"createdAt"`
 	ExpiredAt time.Time `json:"expiredAt"`
 }
@@ -55,7 +55,7 @@ func (s *WebServer) handlePostMSG(w http.ResponseWriter, r *http.Request) {
 		name             = r.FormValue("name")
 		adr              = r.FormValue("address")
 		token            = Token{
-			Name:      name + ":" + adr,
+			Token:     name + ":" + adr,
 			CreatedAt: time.Now(),
 			ExpiredAt: time.Now().AddDate(0, 0, 10),
 		}
@@ -80,7 +80,7 @@ func (s *WebServer) handlePostMSG(w http.ResponseWriter, r *http.Request) {
 	}
 	cookieToken := http.Cookie{
 		Name:    "token",
-		Value:   token.Name,
+		Value:   token.Token,
 		Expires: token.ExpiredAt,
 	}
 

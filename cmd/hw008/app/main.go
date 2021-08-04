@@ -16,7 +16,7 @@ var (
 
 // Entry to save to fake-db
 type Entry struct {
-	Name      string    `json:"token"`
+	Token     string    `json:"token"`
 	CreatedAt time.Time `json:"createdAt"`
 	ExpiredAt time.Time `json:"expiredAt"`
 }
@@ -35,7 +35,7 @@ func setupRouter() (engine *gin.Engine) {
 			c.JSON(400, gin.H{"status": "validation_error", "error": err.Error()})
 			return
 		}
-		DB[entry.Name] = entry
+		DB[entry.Token] = entry
 		c.JSON(http.StatusOK, gin.H{"status": "ok", "entry": &entry})
 	})
 	return
