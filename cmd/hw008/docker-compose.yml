@@ -8,6 +8,8 @@ services:
       dockerfile: cmd/hw008/dockerfiles/DockerfileHW006
     container_name: app-hw-006
     hostname: app-hw-006
+    env_file:
+      - ./config/.env.dev
     ports:
       - "5050:5050"
     links:
@@ -16,8 +18,10 @@ services:
     tty: true
     build:
       context: ../..
-      dockerfile: cmd/hw008/dockerfiles/Dockerfile
+      dockerfile: cmd/hw008/dockerfiles/DockerfileHW008
     container_name: app-hw-008
     hostname: app-hw-008
+    env_file:
+      - ./config/.env.release
     ports:
       - "5051:5051"
