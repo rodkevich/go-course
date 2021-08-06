@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/rodkevich/go-course/cmd/hw009/pg"
 	"github.com/rodkevich/go-course/homework/hw009/book"
+	"github.com/rodkevich/go-course/homework/hw009/book/pg"
 	"github.com/rodkevich/go-course/homework/hw009/book/types"
 )
 
