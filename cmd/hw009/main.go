@@ -36,15 +36,7 @@ func main() {
 	Pinocchio := book.EmptyContact()
 	Pinocchio.Name = "Pinocchio"
 	Pinocchio.Phone = "231-456-1234"
-	// validate
-	ok := Pinocchio.Phone.IsValid()
-	if !ok {
-		panic("Pinocchio.Phone.IsValid() false")
-	}
-	ok = Pinocchio.Group.IsValid()
-	if !ok {
-		panic("Pinocchio.Group.IsValid() false")
-	}
+
 	// create records in DB
 	var contacts []*book.Contact
 	contacts = append(contacts, PeterPan, Pinocchio)
