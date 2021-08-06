@@ -41,10 +41,10 @@ func (b *contactsBook) Up() error {
 
 	_, err = b.db.Query(ctx, str)
 	if err != nil {
-		log.Println("CREATE TABLE")
+		log.Printf("error: create tables: %v", err)
 		return err
 	}
-	log.Println("UP operation done")
+	log.Println("book UP operation done")
 	return nil
 }
 
@@ -68,7 +68,7 @@ func (b *contactsBook) Drop() error {
 		return err
 	}
 	log.Println("Database dropped")
-	defer stmt.Close()
+	stmt.Close()
 	return nil
 }
 
@@ -81,7 +81,7 @@ func (b *contactsBook) Truncate() error {
 		log.Printf("error :cbd.Truncate(): %v", err)
 		return err
 	}
-	defer stmt.Close()
+	stmt.Close()
 	return nil
 }
 
@@ -89,7 +89,7 @@ func (b *contactsBook) Truncate() error {
 func (b *contactsBook) Create(contact *cb.Contact) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	var contactId string
+	var contactID string
 	stmt := "INSERT INTO contact (" +
 		"contact_group, " +
 		"contact_name, " +
@@ -101,8 +101,8 @@ func (b *contactsBook) Create(contact *cb.Contact) (string, error) {
 		contact.Group,
 		contact.Name,
 		contact.Phone,
-	).Scan(&contactId)
-	return contactId, nil
+	).Scan(&contactID)
+	return contactID, nil
 }
 
 // AssignContactToGroup ...
@@ -140,24 +140,22 @@ func (b *contactsBook) FindByGroup(group types.Group) ([]*cb.Contact, error) {
 		"contact_phone " +
 		"FROM contact WHERE contact_group = $1"
 
-	rows, err := b.db.Query(ctx, query, group.String())
+	stmt, err := b.db.Query(ctx, query, group.String())
 	if err != nil {
-		log.Printf("find by group :rows: %v\n", err)
+		log.Printf("find by group :stmt: %v\n", err)
 		return nil, err
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		// c := cb.EmptyContact()
+	defer stmt.Close()
+	for stmt.Next() {
 		c := new(cb.Contact)
-		err = rows.Scan(
+		err = stmt.Scan(
 			&c.ID,
 			&c.Name,
 			&c.Group,
 			&c.Phone,
 		)
 		if err != nil {
-			log.Printf("find by group :rows.Next(): %v\n", err)
+			log.Printf("find by group :stmt.Next(): %v\n", err)
 			return nil, err
 		}
 		persons = append(persons, c)

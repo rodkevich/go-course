@@ -24,12 +24,14 @@ func main() {
 		panic(err)
 	}
 	// create PeterPan with group
-	var contacts []*book.Contact
 	PeterPan, err := book.NewContact(
 		"PeterPan",
 		"123-456-5678",
 		types.Gopher,
 	)
+	if err != nil {
+		panic(err)
+	}
 	// create Pinocchio with NO group
 	Pinocchio := book.EmptyContact()
 	Pinocchio.Name = "Pinocchio"
@@ -44,14 +46,15 @@ func main() {
 		panic("Pinocchio.Group.IsValid() false")
 	}
 	// create records in DB
+	var contacts []*book.Contact
 	contacts = append(contacts, PeterPan, Pinocchio)
 	for _, person := range contacts {
 		id, _ := cbd.Create(person)
 		log.Printf("User created: %v", id)
 	}
 	// find contacts with no group - it will be `Pinocchio`
-	findEmpty, _ := cbd.FindByGroup("")
-	PinocchioFromDB := findEmpty[0]
+	findNoGroup, _ := cbd.FindByGroup("")
+	PinocchioFromDB := findNoGroup[0]
 
 	// update its group
 	newCont := cbd.AssignContactToGroup(PinocchioFromDB, types.Gopher)
@@ -68,5 +71,4 @@ func main() {
 	if err != nil {
 		return
 	}
-
 }
