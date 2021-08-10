@@ -90,39 +90,39 @@ func main() {
 
 	// Postgres search + update
 	// find batch with no group - it will be `Пинок Карлович Кио`
-	pgFoundData, err := pgBook.FindByGroup("")
+	batch, err = pgBook.FindByGroup("")
 	if err != nil {
 		log.Println("pg: search failed:", err)
 		panic(err)
 	}
 	// from pgFoundData update 1rst contact's `group` field
-	contactPinocchio = *(pgBook.AssignContactToGroup(pgFoundData[0], types.Gopher))
+	contactPinocchio = *(pgBook.AssignContactToGroup(batch[0], types.Gopher))
 	log.Printf("pg: updated contact: %v", contactPinocchio)
 
 	// find both from batch by group
-	pgFoundData, _ = pgBook.FindByGroup(types.Gopher)
-	for _, contact := range pgFoundData {
+	batch, _ = pgBook.FindByGroup(types.Gopher)
+	for _, contact := range batch {
 		log.Printf("pg: found `Gopher` contact %v\n", contact.UUID)
 	}
 
 	// Mongo search + update
 	// find batch with no group - it will be `Пинок Карлович Кио`
-	mongoFoundData, err := mongoBook.FindByGroup("")
+	batch, err = mongoBook.FindByGroup("")
 	if err != nil {
 		log.Println("mongo: search failed:", err)
 		panic(err)
 	}
 	// from mongoFoundData update 1rst contact's `group` field
-	contactPinocchio = *(mongoBook.AssignContactToGroup(mongoFoundData[0], types.Gopher))
+	contactPinocchio = *(mongoBook.AssignContactToGroup(batch[0], types.Gopher))
 	log.Printf("mongo: updated contact: %v", contactPinocchio)
 
 	// find both from batch by group
-	mongoFoundData, _ = mongoBook.FindByGroup(types.Gopher)
-	for _, record := range mongoFoundData {
+	batch, _ = mongoBook.FindByGroup(types.Gopher)
+	for _, record := range batch {
 		log.Printf("mongo: found `Gopher` contact %v\n", record.UUID)
 	}
 
-	shutdownApp(pgBook, mongoBook)
+	// shutdownApp(pgBook, mongoBook)
 }
 
 func shutdownApp(pgBook book.ContactsBookDataSource, mongoBook book.ContactsBookDataSource) {
