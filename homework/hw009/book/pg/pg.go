@@ -6,13 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/jackc/pgx/v4/pgxpool"
-
 	"github.com/jackc/pgx/v4"
-
-	"github.com/rodkevich/go-course/homework/hw009/book/types"
-
+	"github.com/jackc/pgx/v4/pgxpool"
 	cb "github.com/rodkevich/go-course/homework/hw009/book"
+	"github.com/rodkevich/go-course/homework/hw009/book/types"
 )
 
 // Represents the contactsBook model
@@ -24,7 +21,6 @@ var (
 	stmt              string
 	rows              pgx.Rows
 	row               pgx.Row
-	err               error
 	ctxDefault        = context.Background()
 	operationsTimeOut = 3 * time.Second
 )
