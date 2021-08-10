@@ -22,6 +22,7 @@ var AllGroups = []Group{
 // Group ...
 type Group string
 
+// IsValid ...
 func (g *Group) IsValid() bool {
 	switch *g {
 	case Gopher, Pythonist, "":

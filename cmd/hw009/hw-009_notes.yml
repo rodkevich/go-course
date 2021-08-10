@@ -1,11 +1,15 @@
-Lesson_09:
-    Let's create an address book DB:
-        Every contact may be described as (Name, Phone, Group)
-        Every contact is allowed to be in ONLY ONE group
-        Group may contain a lot of contacts
-        Groups are predefined by developer
-        Usage of any migration package is strongly recommended
-    Create a package with functionality:
-        Add contact
-        Assign contact to a group
-        List ALL contacts by group
+Lesson_09: &databases
+  Let's create an address book DB: >
+    Every contact may be described as (Name, Phone, Group)
+    Every contact is allowed to be in ONLY ONE group
+    Group may contain a lot of contacts
+    Groups are predefined by developer
+    Usage of any migration package is strongly recommended
+
+  Create a package with functionality:
+    - Add contact
+    - Assign contact to a group
+    - List ALL contacts by group
+
+Lesson_10: *databases
+  - just switch to mongo db

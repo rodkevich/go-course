@@ -18,8 +18,5 @@ services:
   mongo:
     image: mongo:latest
     container_name: mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: toor
     ports:
       - "27017:27017"

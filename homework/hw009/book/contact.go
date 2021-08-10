@@ -6,15 +6,19 @@ import (
 )
 
 // Contact represents any persons model
+// 	@param UUID  *uuid.UUID
+// 	@param Name  string
+// 	@param Phone types.Phone
+// 	@param Group types.Group
 type Contact struct {
-	ID    *uuid.UUID  `json:"id"`
-	Name  string      `json:"first_name"`
-	Phone types.Phone `json:"phone"`
-	Group types.Group `json:"group"`
+	UUID  *uuid.UUID  `json:"uuid" bson:"uuid"`
+	Name  string      `json:"name" bson:"name"`
+	Phone types.Phone `json:"phone" bson:"phone"`
+	Group types.Group `json:"group" bson:"group"`
 }
 
-// EmptyContact ....
-func EmptyContact() *Contact {
+// UnsafeEmptyContact ....
+func UnsafeEmptyContact() *Contact {
 	return &Contact{}
 }
 
@@ -28,5 +32,5 @@ func NewContact(name string, phone types.Phone, group types.Group) (*Contact, er
 	if err != nil {
 		return nil, err
 	}
-	return &Contact{ID: nil, Name: name, Phone: phone, Group: group}, nil
+	return &Contact{UUID: nil, Name: name, Phone: phone, Group: group}, nil
 }
