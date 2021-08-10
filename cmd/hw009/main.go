@@ -50,14 +50,14 @@ func main() {
 	// contactPinocchio created with NO group
 	// book.UnsafeEmptyContact() can be used for purpose
 	// !WARNING UNSAFE! : both methods allow invalid fields to be set
-	contactPinocchio := book.Contact{
+	contactPinocchio = &book.Contact{
 		UUID:  nil,
 		Name:  "Пинок Карлович Кио",
 		Phone: "123.456.7890",
 		Group: "",
 	}
 
-	batch = append(batch, contactPeterPan, &contactPinocchio)
+	batch = append(batch, contactPeterPan, contactPinocchio)
 
 	// create records in PG & Mongo
 	for _, contact := range batch {
