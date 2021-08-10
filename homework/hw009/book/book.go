@@ -2,8 +2,8 @@ package book
 
 import "github.com/rodkevich/go-course/homework/hw009/book/types"
 
-// ContactsBookDataSource represent the repositories
-type ContactsBookDataSource interface {
+// ContactBookDataSource represent the repositories for Contact-Books
+type ContactBookDataSource interface {
 	Up() error
 	Close()
 	Drop() error

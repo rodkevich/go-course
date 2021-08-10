@@ -11,14 +11,6 @@ const (
 	Javascriptizer Group = "blocked"
 )
 
-// AllGroups ...
-var AllGroups = []Group{
-	Gopher,
-	Pythonist,
-	Sishneg,
-	Javascriptizer,
-}
-
 // Group ...
 type Group string
 

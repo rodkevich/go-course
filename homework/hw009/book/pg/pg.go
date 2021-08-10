@@ -6,11 +6,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4/pgxpool"
+
+	"github.com/jackc/pgx/v4"
 
 	"github.com/rodkevich/go-course/homework/hw009/book/types"
 
-	"github.com/jackc/pgx/pgxpool"
 	cb "github.com/rodkevich/go-course/homework/hw009/book"
 )
 
@@ -29,7 +30,7 @@ var (
 )
 
 // Up prepares database
-func (b *contactsBook) Up() error {
+func (b *contactsBook) Up() (err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	// create PG extension to generate UUID's
@@ -39,7 +40,7 @@ func (b *contactsBook) Up() error {
 	rows, err = b.db.Query(ctx, stmt)
 	if err != nil {
 		log.Println("pg: error on creating for uuid generation extension")
-		return err
+		return
 	}
 	defer rows.Close()
 	// create table for contacts
@@ -54,10 +55,10 @@ func (b *contactsBook) Up() error {
 	rows, err = b.db.Query(ctx, stmt)
 	if err != nil {
 		log.Printf("pg: error: create tables: %v", err)
-		return err
+		return
 	}
 	log.Println("pg: book UP operation done")
-	return nil
+	return
 }
 
 // Close the connection
@@ -68,7 +69,7 @@ func (b *contactsBook) Close() {
 }
 
 // Drop ...
-func (b *contactsBook) Drop() error {
+func (b *contactsBook) Drop() (err error) {
 	stmt = `
 		DROP TABLE IF EXISTS contact;
 		`
@@ -76,32 +77,31 @@ func (b *contactsBook) Drop() error {
 	rows, err = b.db.Query(ctxDefault, stmt)
 	if err != nil {
 		log.Printf("pg: error: cbd.Drop(): %v", err)
-		return err
+		return
 	}
 	defer rows.Close()
 	log.Println("pg: database dropped")
-	return nil
+	return
 }
 
 // Truncate ...
-func (b *contactsBook) Truncate() error {
+func (b *contactsBook) Truncate() (err error) {
 	stmt = `
 		TRUNCATE TABLE contact;
 		`
 	rows, err = b.db.Query(ctxDefault, stmt)
 	if err != nil {
 		log.Printf("pg: error: cbd.Truncate(): %v", err)
-		return err
+		return
 	}
 	defer rows.Close()
-	return nil
+	return
 }
 
 // Create ...
-func (b *contactsBook) Create(contact *cb.Contact) (string, error) {
+func (b *contactsBook) Create(contact *cb.Contact) (contactID string, err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
-	var contactID string
 	stmt = `
 		INSERT INTO contact (contact_group, contact_name, contact_phone)
 		VALUES ($1, $2, $3)
@@ -112,7 +112,10 @@ func (b *contactsBook) Create(contact *cb.Contact) (string, error) {
 		contact.Group,
 		contact.Name,
 		contact.Phone).Scan(&contactID)
-	return contactID, nil
+	if err != nil {
+		return
+	}
+	return
 }
 
 // AssignContactToGroup ...
@@ -136,29 +139,27 @@ func (b *contactsBook) AssignContactToGroup(contact *cb.Contact, group types.Gro
 		log.Printf("pg: error: db.AssignContactToGroup(): %v", err)
 		return nil
 	}
-	return newContact
+	return
 }
 
 // FindByGroup ...
-func (b *contactsBook) FindByGroup(group types.Group) ([]*cb.Contact, error) {
+func (b *contactsBook) FindByGroup(group types.Group) (contacts []*cb.Contact, err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
-
-	persons := make([]*cb.Contact, 0)
-	query := `
+	stmt := `
 		SELECT contact_id, contact_name, contact_group, contact_phone
 		FROM contact
 		WHERE contact_group = $1
 		`
-	stmt, err := b.db.Query(ctx, query, group)
+	rows, err = b.db.Query(ctx, stmt, group)
 	if err != nil {
 		log.Printf("pg: find by group: stmt: %v\n", err)
-		return nil, err
+		return
 	}
-	defer stmt.Close()
-	for stmt.Next() {
+	defer rows.Close()
+	for rows.Next() {
 		c := new(cb.Contact)
-		err = stmt.Scan(
+		err = rows.Scan(
 			&c.UUID,
 			&c.Name,
 			&c.Group,
@@ -166,15 +167,15 @@ func (b *contactsBook) FindByGroup(group types.Group) ([]*cb.Contact, error) {
 		)
 		if err != nil {
 			log.Printf("pg: find by group: stmt.Next(): %v\n", err)
-			return nil, err
+			return
 		}
-		persons = append(persons, c)
+		contacts = append(contacts, c)
 	}
-	return persons, nil
+	return
 }
 
 // NewContactsBook ...
-func NewContactsBook() (cb.ContactsBookDataSource, error) {
+func NewContactsBook() (cb.ContactBookDataSource, error) {
 	var config = os.Getenv("DATABASE_URL")
 	// create data-base connection pool:
 	pool, poolErr := pgxpool.Connect(ctxDefault, config)

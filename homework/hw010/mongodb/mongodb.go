@@ -2,7 +2,6 @@ package mongodb
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -24,13 +23,14 @@ type contactsBook struct {
 }
 
 // Up ...
-func (c contactsBook) Up() error {
-	err := c.client.Ping(c.ctx, nil)
+func (c contactsBook) Up() (err error) {
+	err = c.client.Ping(c.ctx, nil)
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
 	log.Println("mongo: book UP operation done")
-	return nil
+	return
 }
 
 // Close ...
@@ -44,22 +44,23 @@ func (c contactsBook) Close() {
 }
 
 // Drop ...
-func (c contactsBook) Drop() error {
-	err := c.collection.Drop(c.ctx)
+func (c contactsBook) Drop() (err error) {
+	err = c.collection.Drop(c.ctx)
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
 	log.Println("mongo: database dropped")
-	return nil
+	return
 }
 
 // Truncate ...
-func (c contactsBook) Truncate() error {
-	_, err := c.collection.DeleteMany(c.ctx, bson.D{})
+func (c contactsBook) Truncate() (err error) {
+	_, err = c.collection.DeleteMany(c.ctx, bson.D{})
 	if err != nil {
-		return err
+		return
 	}
-	return nil
+	return
 }
 
 // Create ...
@@ -81,7 +82,7 @@ func (c contactsBook) AssignContactToGroup(contact *cb.Contact, gr types.Group) 
 	rtn := c.collection.FindOneAndUpdate(c.ctx, filter, stmt).Decode(&new)
 	if rtn != nil {
 		if rtn == mongo.ErrNoDocuments {
-			return nil
+			return
 		}
 		log.Println(rtn)
 	}
@@ -89,7 +90,7 @@ func (c contactsBook) AssignContactToGroup(contact *cb.Contact, gr types.Group) 
 }
 
 // FindByGroup ...
-func (c contactsBook) FindByGroup(gr types.Group) ([]*cb.Contact, error) {
+func (c contactsBook) FindByGroup(gr types.Group) (contacts []*cb.Contact, err error) {
 	sort := options.Find() // just curiosity ^^ if it doesn't break a stmt
 	sort.SetSort(bson.D{{"uuid", -1}})
 	cur, err := c.collection.Find(
@@ -98,26 +99,22 @@ func (c contactsBook) FindByGroup(gr types.Group) ([]*cb.Contact, error) {
 		sort,
 	)
 	if err != nil {
-		return nil, err
+		return
 	}
 	defer cur.Close(c.ctx)
 
-	var rtn []*cb.Contact
-	if err = cur.All(context.Background(), &rtn); err != nil {
+	if err = cur.All(context.Background(), &contacts); err != nil {
 		log.Println(err)
-		return nil, err
+		return
 	}
-	if err := cur.Err(); err != nil {
-		return nil, err
+	if err = cur.Err(); err != nil {
+		return
 	}
-	for _, record := range rtn {
-		fmt.Println(record)
-	}
-	return rtn, nil
+	return
 }
 
 // NewContactsBook ...
-func NewContactsBook() (cb.ContactsBookDataSource, error) {
+func NewContactsBook() (cb.ContactBookDataSource, error) {
 	var mongoURL = os.Getenv("MONGO_URL")
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURL))
@@ -135,39 +132,3 @@ func NewContactsBook() (cb.ContactsBookDataSource, error) {
 		ctx:        ctx,
 	}, nil
 }
-
-//
-// func (c *CountriesCollection) Find(filter interface{}, opts ...*options.FindOptions) ([]Country, error) {
-// 	cur, err := c.collection.Find(c.ctx, filter, opts...)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer cur.Close(c.ctx)
-//
-// 	var results []Country
-// 	cur.All(c.ctx, &results)
-// 	if err := cur.Err(); err != nil {
-// 		return nil, err
-// 	}
-// }
-
-// func (c *CountriesCollection) InsertOne(country Country) error {
-// 	_, err := c.collection.InsertOne(c.ctx, country)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-//
-
-//
-// 	return results, nil
-// }
-//
-// func (c *CountriesCollection) Remove(filter interface{}) (int, error) {
-// 	deleteResult, err := c.collection.DeleteMany(c.ctx, filter)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-// 	return int(deleteResult.DeletedCount), nil
-// }

@@ -16,12 +16,10 @@ type Phone string
 // 	+91 (123) 456-7890
 func (p *Phone) IsValid() bool {
 	re := regexp.MustCompile(`(^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$)`)
-	// submatch := re.FindStringSubmatch("Phone Number: 15817452367;")
 	submatch := re.FindStringSubmatch(p.String())
 	if len(submatch) < 2 {
 		return false
 	}
-	// match := submatch[1]
 	return true
 }
 
