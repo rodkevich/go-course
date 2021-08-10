@@ -80,7 +80,7 @@ func main() {
 		// add contact to mongo using postgres generated UUID
 		contactMongoID, err := mongoBook.Create(contact)
 		if err != nil {
-			log.Printf("can not create Contact in mongo, UUID: %v", contact.UUID)
+			log.Printf("can not create contact in mongo, UUID: %v", contact.UUID)
 			panic(err)
 		}
 		// show in logs

@@ -34,8 +34,8 @@ func (b *contactsBook) Up() error {
 	defer cancel()
 	// create PG extension to generate UUID's
 	stmt = `
-			CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-			`
+		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+		`
 	rows, err = b.db.Query(ctx, stmt)
 	if err != nil {
 		log.Println("pg: error on creating for uuid generation extension")
@@ -44,13 +44,13 @@ func (b *contactsBook) Up() error {
 	defer rows.Close()
 	// create table for contacts
 	stmt = `
-			CREATE TABLE IF NOT EXISTS contact (
-			contact_id uuid DEFAULT uuid_generate_v4 (),
-			contact_group VARCHAR NOT NULL,
-			contact_name VARCHAR NOT NULL,
-			contact_phone VARCHAR,
-			PRIMARY KEY (contact_id));
-			`
+		CREATE TABLE IF NOT EXISTS contact (
+		contact_id uuid DEFAULT uuid_generate_v4 (),
+		contact_group VARCHAR NOT NULL,
+		contact_name VARCHAR NOT NULL,
+		contact_phone VARCHAR,
+		PRIMARY KEY (contact_id));
+		`
 	rows, err = b.db.Query(ctx, stmt)
 	if err != nil {
 		log.Printf("pg: error: create tables: %v", err)
@@ -70,8 +70,8 @@ func (b *contactsBook) Close() {
 // Drop ...
 func (b *contactsBook) Drop() error {
 	stmt = `
-			DROP TABLE IF EXISTS contact;
-			`
+		DROP TABLE IF EXISTS contact;
+		`
 	// statement to send to db
 	rows, err = b.db.Query(ctxDefault, stmt)
 	if err != nil {
@@ -86,8 +86,8 @@ func (b *contactsBook) Drop() error {
 // Truncate ...
 func (b *contactsBook) Truncate() error {
 	stmt = `
-			TRUNCATE TABLE contact;
-			`
+		TRUNCATE TABLE contact;
+		`
 	rows, err = b.db.Query(ctxDefault, stmt)
 	if err != nil {
 		log.Printf("pg: error: cbd.Truncate(): %v", err)
@@ -103,10 +103,10 @@ func (b *contactsBook) Create(contact *cb.Contact) (string, error) {
 	defer cancel()
 	var contactID string
 	stmt = `
-			INSERT INTO contact (contact_group, contact_name, contact_phone)
-			VALUES ($1, $2, $3)
-			RETURNING contact_id;
-			`
+		INSERT INTO contact (contact_group, contact_name, contact_phone)
+		VALUES ($1, $2, $3)
+		RETURNING contact_id;
+		`
 	err = b.db.QueryRow(
 		ctx, stmt,
 		contact.Group,
@@ -120,11 +120,11 @@ func (b *contactsBook) AssignContactToGroup(contact *cb.Contact, group types.Gro
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	stmt := `
-			UPDATE contact
-			SET contact_group = $1
-			WHERE contact_id = $2
-			RETURNING *;
-			`
+		UPDATE contact
+		SET contact_group = $1
+		WHERE contact_id = $2
+		RETURNING *;
+		`
 	newContact = new(cb.Contact)
 	err := b.db.QueryRow(ctx, stmt, group, contact.UUID).Scan(
 		&newContact.UUID,
@@ -145,14 +145,11 @@ func (b *contactsBook) FindByGroup(group types.Group) ([]*cb.Contact, error) {
 	defer cancel()
 
 	persons := make([]*cb.Contact, 0)
-	query := "SELECT " +
-		"contact_id, " +
-		"contact_name, " +
-		"contact_group, " +
-		"contact_phone " +
-		"FROM contact " +
-		"WHERE contact_group = $1"
-
+	query := `
+		SELECT contact_id, contact_name, contact_group, contact_phone
+		FROM contact
+		WHERE contact_group = $1
+		`
 	stmt, err := b.db.Query(ctx, query, group)
 	if err != nil {
 		log.Printf("pg: find by group: stmt: %v\n", err)
