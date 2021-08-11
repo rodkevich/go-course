@@ -13,7 +13,7 @@ var ErrInvalidArgs = errors.New("error: vars must be positive and != 0")
 // 	Returns true if one of arguments is:
 // 	- negative
 // 	- null
-func UsedArgsIncludeInvalid(args []float64) (b bool) {
+func UsedArgsIncludeInvalid(args ...float64) (b bool) {
 	// check for empty slice
 	if len(args) == 0 {
 		return true

@@ -19,7 +19,7 @@ func New(height float64, width float64) Rectangle {
 
 // Area S=a*b
 func (r Rectangle) Area() (float64, error) {
-	if h.UsedArgsIncludeInvalid([]float64{r.Width, r.Height}) {
+	if h.UsedArgsIncludeInvalid([]float64{r.Width, r.Height}...) {
 		return 0, h.ErrInvalidArgs
 
 	}
@@ -28,7 +28,7 @@ func (r Rectangle) Area() (float64, error) {
 
 // Perimeter P=2(a+b)
 func (r Rectangle) Perimeter() (float64, error) {
-	if h.UsedArgsIncludeInvalid([]float64{r.Width, r.Height}) {
+	if h.UsedArgsIncludeInvalid([]float64{r.Width, r.Height}...) {
 		return 0, h.ErrInvalidArgs
 	}
 	return 2 * (r.Height + r.Width), nil

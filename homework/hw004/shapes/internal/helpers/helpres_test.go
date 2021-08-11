@@ -20,7 +20,7 @@ func TestUsedArgsIncludeInvalid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotB := UsedArgsIncludeInvalid(tt.args); gotB != tt.wantB {
+			if gotB := UsedArgsIncludeInvalid(tt.args...); gotB != tt.wantB {
 				t.Errorf("UsedArgsIncludeInvalid() = %v, want %v", gotB, tt.wantB)
 			}
 		})
