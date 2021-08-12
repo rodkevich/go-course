@@ -7,10 +7,10 @@ import (
 const address = "127.0.0.1:5000"
 
 func main() {
-	l := task02.NewListenServer(address)
-	go l.Run()
-	cli := task02.NewClient(address)
+	server := task02.NewListenServer(address)
+	go server.Run()
+	client := task02.NewClient(address)
 	for {
-		cli.Start()
+		client.Start()
 	}
 }

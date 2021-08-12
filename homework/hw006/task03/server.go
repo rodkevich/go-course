@@ -17,7 +17,7 @@ const (
 type webServer struct {
 	Address string
 	output  func(w io.Writer, a ...interface{}) (n int, err error)
-	log func (v ...interface{})
+	log     func(v ...interface{})
 }
 
 // NewWebServer constructor for instance
@@ -25,7 +25,7 @@ func NewWebServer() *webServer {
 	return &webServer{
 		Address: address,
 		output:  fmt.Fprintln,
-		log:log.Println,
+		log:     log.Println,
 	}
 }
 
