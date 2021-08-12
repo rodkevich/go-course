@@ -1,14 +1,13 @@
 package types
 
-import (
-	"fmt"
-)
+import "fmt"
 
 const (
+	NoGroup        Group = ""
 	Gopher         Group = "trainee"
 	Pythonist      Group = "active"
-	Sishneg        Group = "pending"
-	Javascriptizer Group = "blocked"
+	Sishneg        Group = "pending" // invalid if checked with IsValid()
+	Javascriptizer Group = "blocked" // invalid if checked with IsValid()
 )
 
 // Group ...
@@ -17,7 +16,7 @@ type Group string
 // IsValid ...
 func (g *Group) IsValid() bool {
 	switch *g {
-	case Gopher, Pythonist, "":
+	case Gopher, Pythonist, NoGroup:
 		return true
 	}
 	return false

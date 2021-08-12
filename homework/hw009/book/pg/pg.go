@@ -95,7 +95,7 @@ func (b *contactsBook) Truncate() (err error) {
 }
 
 // Create ...
-func (b *contactsBook) Create(contact *cb.Contact) (contactID string, err error) {
+func (b *contactsBook) Create(contact *types.Contact) (contactID string, err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	stmt = `
@@ -115,7 +115,7 @@ func (b *contactsBook) Create(contact *cb.Contact) (contactID string, err error)
 }
 
 // AssignContactToGroup ...
-func (b *contactsBook) AssignContactToGroup(contact *cb.Contact, group types.Group) (newContact *cb.Contact) {
+func (b *contactsBook) AssignContactToGroup(contact *types.Contact, group types.Group) (newContact *types.Contact) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	stmt := `
@@ -124,7 +124,7 @@ func (b *contactsBook) AssignContactToGroup(contact *cb.Contact, group types.Gro
 		WHERE contact_id = $2
 		RETURNING *;
 		`
-	newContact = new(cb.Contact)
+	newContact = new(types.Contact)
 	err := b.db.QueryRow(ctx, stmt, group, contact.UUID).Scan(
 		&newContact.UUID,
 		&newContact.Name,
@@ -133,13 +133,13 @@ func (b *contactsBook) AssignContactToGroup(contact *cb.Contact, group types.Gro
 	)
 	if err != nil {
 		log.Printf("pg: error: db.AssignContactToGroup(): %v", err)
-		return nil
+		return
 	}
 	return
 }
 
 // FindByGroup ...
-func (b *contactsBook) FindByGroup(group types.Group) (contacts []*cb.Contact, err error) {
+func (b *contactsBook) FindByGroup(group types.Group) (contacts []*types.Contact, err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	stmt := `
@@ -154,7 +154,7 @@ func (b *contactsBook) FindByGroup(group types.Group) (contacts []*cb.Contact, e
 	}
 	defer rows.Close()
 	for rows.Next() {
-		c := new(cb.Contact)
+		c := new(types.Contact)
 		err = rows.Scan(
 			&c.UUID,
 			&c.Name,
@@ -171,13 +171,17 @@ func (b *contactsBook) FindByGroup(group types.Group) (contacts []*cb.Contact, e
 }
 
 // NewContactsBook ...
-func NewContactsBook() (cb.ContactBookDataSource, error) {
+func NewContactsBook() (ds cb.ContactBookDataSource, err error) {
+	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
+	defer cancel()
 	var config = os.Getenv("DATABASE_URL")
 	// create data-base connection pool:
-	pool, poolErr := pgxpool.Connect(ctxDefault, config)
-	if poolErr != nil {
-		log.Fatalf("pg: unable to connection to database: %v\n", poolErr)
+	pool, err := pgxpool.Connect(ctx, config)
+	if err != nil {
+		log.Printf("pg: unable to connection to database: %v\n", err)
+		return
 	}
 	log.Printf("pg: connected!")
-	return &contactsBook{pool}, nil
+	ds = &contactsBook{pool}
+	return
 }

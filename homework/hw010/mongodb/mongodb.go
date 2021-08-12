@@ -14,7 +14,10 @@ import (
 	cb "github.com/rodkevich/go-course/homework/hw009/book"
 	"github.com/rodkevich/go-course/homework/hw009/book/types"
 )
-
+var (
+	ctxDefault        = context.Background()
+	operationsTimeOut = 3 * time.Second
+)
 // Represents the contactsBook model
 type contactsBook struct {
 	client     *mongo.Client
@@ -24,7 +27,7 @@ type contactsBook struct {
 
 // Up ...
 func (c contactsBook) Up() (err error) {
-	err = c.client.Ping(c.ctx, nil)
+	err = c.client.Ping(ctxDefault, nil)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -37,7 +40,7 @@ func (c contactsBook) Up() (err error) {
 func (c contactsBook) Close() {
 	log.Println("mongo: book disconnecting ...")
 	defer log.Println("mongo: book disconnecting - done")
-	err := c.client.Disconnect(c.ctx)
+	err := c.client.Disconnect(ctxDefault)
 	if err != nil {
 		return
 	}
@@ -45,7 +48,7 @@ func (c contactsBook) Close() {
 
 // Drop ...
 func (c contactsBook) Drop() (err error) {
-	err = c.collection.Drop(c.ctx)
+	err = c.collection.Drop(ctxDefault)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -56,7 +59,7 @@ func (c contactsBook) Drop() (err error) {
 
 // Truncate ...
 func (c contactsBook) Truncate() (err error) {
-	_, err = c.collection.DeleteMany(c.ctx, bson.D{})
+	_, err = c.collection.DeleteMany(ctxDefault, bson.D{})
 	if err != nil {
 		return
 	}
@@ -64,8 +67,10 @@ func (c contactsBook) Truncate() (err error) {
 }
 
 // Create ...
-func (c contactsBook) Create(contact *cb.Contact) (recordID string, err error) {
-	rtn, err := c.collection.InsertOne(c.ctx, contact)
+func (c contactsBook) Create(contact *types.Contact) (recordID string, err error) {
+	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
+	defer cancel()
+	rtn, err := c.collection.InsertOne(ctx, contact)
 	if err != nil {
 		return
 	}
@@ -74,12 +79,14 @@ func (c contactsBook) Create(contact *cb.Contact) (recordID string, err error) {
 }
 
 // AssignContactToGroup ...
-func (c contactsBook) AssignContactToGroup(contact *cb.Contact, gr types.Group) (new *cb.Contact) {
+func (c contactsBook) AssignContactToGroup(contact *types.Contact, gr types.Group) (new *types.Contact) {
+	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
+	defer cancel()
 	var (
 		stmt   = bson.M{"$set": bson.M{"group": gr}}
 		filter = bson.M{"uuid": &contact.UUID}
 	)
-	rtn := c.collection.FindOneAndUpdate(c.ctx, filter, stmt).Decode(&new)
+	rtn := c.collection.FindOneAndUpdate(ctx, filter, stmt).Decode(&new)
 	if rtn != nil {
 		if rtn == mongo.ErrNoDocuments {
 			return
@@ -90,7 +97,9 @@ func (c contactsBook) AssignContactToGroup(contact *cb.Contact, gr types.Group) 
 }
 
 // FindByGroup ...
-func (c contactsBook) FindByGroup(gr types.Group) (contacts []*cb.Contact, err error) {
+func (c contactsBook) FindByGroup(gr types.Group) (contacts []*types.Contact, err error) {
+	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
+	defer cancel()
 	sort := options.Find() // just curiosity ^^ if it doesn't break a stmt
 	sort.SetSort(bson.D{{"uuid", -1}})
 	cur, err := c.collection.Find(
@@ -101,9 +110,9 @@ func (c contactsBook) FindByGroup(gr types.Group) (contacts []*cb.Contact, err e
 	if err != nil {
 		return
 	}
-	defer cur.Close(c.ctx)
+	defer cur.Close(ctxDefault)
 
-	if err = cur.All(context.Background(), &contacts); err != nil {
+	if err = cur.All(ctx, &contacts); err != nil {
 		log.Println(err)
 		return
 	}
@@ -114,21 +123,25 @@ func (c contactsBook) FindByGroup(gr types.Group) (contacts []*cb.Contact, err e
 }
 
 // NewContactsBook ...
-func NewContactsBook() (cb.ContactBookDataSource, error) {
+func NewContactsBook() (ds cb.ContactBookDataSource, err error) {
+	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
+	defer cancel()
 	var mongoURL = os.Getenv("MONGO_URL")
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURL))
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 	database := client.Database("contacts-book").Collection("contacts")
-	return &contactsBook{
+	ds = &contactsBook{
 		client:     client,
 		collection: database,
-		ctx:        ctx,
-	}, nil
+		ctx:        ctxDefault,
+	}
+	return
 }

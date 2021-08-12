@@ -9,7 +9,7 @@ type ContactBookDataSource interface {
 	Drop() error
 	Truncate() error
 
-	Create(contact *Contact) (string, error)
-	AssignContactToGroup(contact *Contact, group types.Group) (n *Contact)
-	FindByGroup(group types.Group) ([]*Contact, error)
+	Create(contact *types.Contact) (string, error)
+	AssignContactToGroup(contact *types.Contact, group types.Group) (n *types.Contact)
+	FindByGroup(group types.Group) ([]*types.Contact, error)
 }
