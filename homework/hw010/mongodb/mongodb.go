@@ -14,10 +14,12 @@ import (
 	cb "github.com/rodkevich/go-course/homework/hw009/book"
 	"github.com/rodkevich/go-course/homework/hw009/book/types"
 )
+
 var (
 	ctxDefault        = context.Background()
 	operationsTimeOut = 3 * time.Second
 )
+
 // Represents the contactsBook model
 type contactsBook struct {
 	client     *mongo.Client
@@ -79,14 +81,15 @@ func (c contactsBook) Create(contact *types.Contact) (recordID string, err error
 }
 
 // AssignContactToGroup ...
-func (c contactsBook) AssignContactToGroup(contact *types.Contact, gr types.Group) (new *types.Contact) {
+func (c contactsBook) AssignContactToGroup(contact *types.Contact, gr types.Group) (n *types.Contact) {
+	n = new(types.Contact)
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	var (
 		stmt   = bson.M{"$set": bson.M{"group": gr}}
 		filter = bson.M{"uuid": &contact.UUID}
 	)
-	rtn := c.collection.FindOneAndUpdate(ctx, filter, stmt).Decode(&new)
+	rtn := c.collection.FindOneAndUpdate(ctx, filter, stmt).Decode(&n)
 	if rtn != nil {
 		if rtn == mongo.ErrNoDocuments {
 			return

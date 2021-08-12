@@ -17,7 +17,7 @@ var (
 	err                 error
 	batch               []*types.Contact
 	pgBook, mongoBook   book.ContactBookDataSource
-	PeterPan, Pinocchio *types.Contact
+	peterPan, pinocchio *types.Contact
 )
 
 func main() {
@@ -27,46 +27,51 @@ func main() {
 	// new books
 	mongoBook, err = mongodb.NewContactsBook()
 	if err != nil {
-		panic(err)
+		log.Printf("err: %v", err)
 	}
 	pgBook, err = pg.NewContactsBook()
 	if err != nil {
-		panic(err)
+		log.Printf("err: %v", err)
 	}
+
 	// init pgBook + mongoBook
 	if err = mongoBook.Up(); err != nil {
-		panic(err)
+		log.Printf("err: %v", err)
 	}
 	if err = pgBook.Up(); err != nil {
-		panic(err)
+		log.Printf("err: %v", err)
 	}
-	// create PeterPan with group
-	PeterPan, err = types.NewContact("Питер Джеймсович Пэн", "+91 (123) 456-7890")
+
+	// schedule app turn off
+	defer shutdownApp(pgBook, mongoBook)
+
+	// create peterPan with group
+	peterPan, err = types.NewContact("Питер Джеймсович Пэн", "+91 (123) 456-7890")
 	if err != nil {
-		panic(err)
+		log.Printf("err: %v", err)
 	}
-	// Pinocchio created with NO group and nil uuID
-	Pinocchio = &types.Contact{
+	// pinocchio created with NO group and nil uuID
+	pinocchio = &types.Contact{
 		UUID:  nil,
 		Name:  "Пинок Карлович Кио",
 		Phone: "123.456.7890",
 		Group: types.NoGroup,
 	}
 
-	batch = append(batch, PeterPan, Pinocchio)
+	batch = append(batch, peterPan, pinocchio)
 
 	// create records in PG & Mongo
 	for _, contact := range batch {
 		// add batch to postgres + get string uuID
 		uuID, err = pgBook.Create(contact)
 		if err != nil {
-			panic(err)
+			log.Printf("err: %v", err)
 		}
 
 		// convert from returned str to valid uuid type
 		decodedUUID, err := uuid.Parse(uuID)
 		if err != nil {
-			panic(err)
+			log.Printf("err: %v", err)
 		}
 
 		// set uuid as a contact field
@@ -74,7 +79,7 @@ func main() {
 		// add contact to mongo using postgres generated uuID
 		uuID, err = mongoBook.Create(contact)
 		if err != nil {
-			panic(err)
+			log.Printf("err: %v", err)
 		}
 		// show in logs
 		log.Printf("pg: contact created: %v", contact.UUID)
@@ -85,11 +90,11 @@ func main() {
 	// find batch with no group - it will be `Пинок Карлович Кио`
 	batch, err = pgBook.FindByGroup(types.NoGroup) // "" can be used
 	if err != nil {
-		panic(err)
+		log.Printf("err: %v", err)
 	}
 	// from pgFoundData update 1rst contact's `group` field
-	Pinocchio = pgBook.AssignContactToGroup(batch[0], types.Gopher)
-	log.Printf("pg: updated contact: %v", Pinocchio)
+	pinocchio = pgBook.AssignContactToGroup(batch[0], types.Gopher)
+	log.Printf("pg: updated contact: %v", pinocchio)
 
 	// find both from batch by group
 	batch, _ = pgBook.FindByGroup(types.Gopher)
@@ -101,11 +106,11 @@ func main() {
 	// find batch with no group - it will be `Пинок Карлович Кио`
 	batch, err = mongoBook.FindByGroup(types.NoGroup)
 	if err != nil {
-		panic(err)
+		log.Printf("err: %v", err)
 	}
 	// from mongoFoundData update 1rst contact's `group` field
-	Pinocchio = mongoBook.AssignContactToGroup(batch[0], types.Gopher)
-	log.Printf("mongo: updated contact: %v", Pinocchio)
+	pinocchio = mongoBook.AssignContactToGroup(batch[0], types.Gopher)
+	log.Printf("mongo: updated contact: %v", pinocchio)
 
 	// find both from batch by group
 	batch, _ = mongoBook.FindByGroup(types.Gopher)
@@ -113,7 +118,6 @@ func main() {
 		log.Printf("mongo: found `Gopher` contact %v\n", record.UUID)
 	}
 
-	shutdownApp(pgBook, mongoBook)
 }
 
 func shutdownApp(pgBook book.ContactBookDataSource, mongoBook book.ContactBookDataSource) {
