@@ -25,6 +25,10 @@ var (
 	operationsTimeOut = 3 * time.Second
 )
 
+func (c contactsBook) String() string {
+	return "Postgres"
+}
+
 // Up prepares database
 func (b *contactsBook) Up() (err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
@@ -127,8 +131,8 @@ func (b *contactsBook) AssignContactToGroup(contact *types.Contact, group types.
 	newContact = new(types.Contact)
 	err := b.db.QueryRow(ctx, stmt, group, contact.UUID).Scan(
 		&newContact.UUID,
-		&newContact.Name,
 		&newContact.Group,
+		&newContact.Name,
 		&newContact.Phone,
 	)
 	if err != nil {
@@ -158,8 +162,8 @@ func (b *contactsBook) FindByGroup(group types.Group) (contacts []*types.Contact
 		err = rows.Scan(
 			&c.UUID,
 			&c.Name,
-			&c.Group,
 			&c.Phone,
+			&c.Group,
 		)
 		if err != nil {
 			log.Printf("pg: find by group: stmt.Next(): %v\n", err)

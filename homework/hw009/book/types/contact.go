@@ -9,14 +9,9 @@ import "github.com/google/uuid"
 // 	@param Group types.Group
 type Contact struct {
 	UUID  *uuid.UUID `json:"uuid" bson:"uuid"`
+	Group Group      `json:"group" bson:"group"`
 	Name  string     `json:"name" bson:"name"`
 	Phone Phone      `json:"phone" bson:"phone"`
-	Group Group      `json:"group" bson:"group"`
-}
-
-// emptyContact ....
-func emptyContact() *Contact {
-	return &Contact{nil, "", "", NoGroup}
 }
 
 // NewContact ...

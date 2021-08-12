@@ -17,7 +17,7 @@ import (
 
 var (
 	ctxDefault        = context.Background()
-	operationsTimeOut = 3 * time.Second
+	operationsTimeOut = 10 * time.Second
 )
 
 // Represents the contactsBook model
@@ -25,6 +25,10 @@ type contactsBook struct {
 	client     *mongo.Client
 	collection *mongo.Collection
 	ctx        context.Context
+}
+
+func (c contactsBook) String() string {
+	return "Mongo"
 }
 
 // Up ...
@@ -83,13 +87,13 @@ func (c contactsBook) Create(contact *types.Contact) (recordID string, err error
 // AssignContactToGroup ...
 func (c contactsBook) AssignContactToGroup(contact *types.Contact, gr types.Group) (n *types.Contact) {
 	n = new(types.Contact)
-	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
+	_, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	var (
 		stmt   = bson.M{"$set": bson.M{"group": gr}}
 		filter = bson.M{"uuid": &contact.UUID}
 	)
-	rtn := c.collection.FindOneAndUpdate(ctx, filter, stmt).Decode(&n)
+	rtn := c.collection.FindOneAndUpdate(ctxDefault, filter, stmt).Decode(&n)
 	if rtn != nil {
 		if rtn == mongo.ErrNoDocuments {
 			return
@@ -103,7 +107,7 @@ func (c contactsBook) AssignContactToGroup(contact *types.Contact, gr types.Grou
 func (c contactsBook) FindByGroup(gr types.Group) (contacts []*types.Contact, err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
-	sort := options.Find() // just curiosity ^^ if it doesn't break a stmt
+	sort := options.Find() // add sort
 	sort.SetSort(bson.D{{"uuid", -1}})
 	cur, err := c.collection.Find(
 		c.ctx,

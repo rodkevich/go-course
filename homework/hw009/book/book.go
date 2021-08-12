@@ -12,4 +12,5 @@ type ContactBookDataSource interface {
 	Create(contact *types.Contact) (string, error)
 	AssignContactToGroup(contact *types.Contact, group types.Group) (n *types.Contact)
 	FindByGroup(group types.Group) ([]*types.Contact, error)
+	String() string
 }
