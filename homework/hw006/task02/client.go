@@ -19,7 +19,7 @@ type clientCLI struct {
 
 // Client to work from CLI
 type Client interface {
-	makeCallToServer([]byte)
+	makeCallToServer([]byte) error
 	Start()
 }
 
@@ -35,15 +35,33 @@ func NewClient(address string) Client {
 }
 
 // makeCallToServer function connects and requests remote
-func (c clientCLI) makeCallToServer(lines []byte) {
+func (c clientCLI) makeCallToServer(lines []byte) (err error) {
 
 	url := "http://" + c.Address
 	body := bytes.NewBuffer(lines)
-	req, _ := http.NewRequest(http.MethodPost, url, body)
-	res, _ := c.client.Do(req)
-	rbd, _ := ioutil.ReadAll(res.Body)
-	defer res.Body.Close()
-	c.printer(os.Stdout, string(rbd))
+	req, err := http.NewRequest(http.MethodPost, url, body)
+	if err != nil {
+		return
+	}
+	rtn, err := c.client.Do(req)
+	if err != nil {
+		return
+	}
+	rtnBodyBytes, err := ioutil.ReadAll(rtn.Body)
+	if err != nil {
+		return
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			return
+		}
+	}(rtn.Body)
+	_, err = c.printer(os.Stdout, string(rtnBodyBytes))
+	if err != nil {
+		return
+	}
+	return
 }
 
 // Start the instance of client

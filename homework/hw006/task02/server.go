@@ -32,9 +32,9 @@ func NewListenServer(address string) ListenServer {
 
 // procByteItemsFromStdin to be used as a handler for processing requests
 func (s listenServer) procByteItemsFromStdin(w http.ResponseWriter, r *http.Request) {
-	rb, ioErr := ioutil.ReadAll(r.Body)
-	if ioErr != nil {
-		s.output(w, "reading body from request:", ioErr)
+	rb, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		s.output(w, "reading body from request:", err)
 	}
 	items := strings.Split(string(rb), `\n`)
 

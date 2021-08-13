@@ -9,7 +9,6 @@ import (
 
 type echoServer struct {
 	Address     string
-	somePrivate string
 }
 
 // EchoServer server command interface
@@ -22,7 +21,6 @@ type EchoServer interface {
 func NewEchoServer(address string) EchoServer {
 	return echoServer{
 		Address:     address,
-		somePrivate: "some_private_info",
 	}
 }
 
