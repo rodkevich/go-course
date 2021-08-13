@@ -92,9 +92,9 @@ func (c contactsBook) AssignContactToGroup(contact *types.Contact, gr types.Grou
 	var (
 		stmt   = bson.M{"$set": bson.M{"group": gr}}
 		filter = bson.M{"uuid": &contact.UUID}
-		// add opts... other way will get old not updated document in return (default: before)
-		after  = options.After
-		opt    = options.FindOneAndUpdateOptions{
+		// add opts... other way will get not updated document in return (default: before)
+		after = options.After
+		opt   = options.FindOneAndUpdateOptions{
 			ReturnDocument: &after,
 		}
 	)

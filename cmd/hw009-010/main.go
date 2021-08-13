@@ -40,7 +40,7 @@ func init() {
 
 func main() {
 	// schedule app turn off
-	defer shutdownApp()
+	defer cleanOnAppShutdown(true)
 
 	// prepare the contacts:
 	// create contacts with/without group and uuid
@@ -90,49 +90,56 @@ func main() {
 		log.Printf("mongo: contact created: %v", uuID)
 	}
 
+	// find + update operations
 	for _, dataSource := range booksAvailable {
 		log.Printf("using data-source: %v", dataSource.String())
 
 		// find batchContacts with no group - it will be `Питер Джеймсович Пэн`
 		batchContacts, err = dataSource.FindByGroup(types.NoGroup) // "" can be used
-		log.Printf("found `NoGroup` contact %v\n", batchContacts[0])
-
+		toBeUpdatedContact := batchContacts[0]
+		log.Printf("wanna update `NoGroup` contact %v\n", toBeUpdatedContact)
 		if err != nil {
 			log.Printf("err: %v", err)
 		}
 
 		// from found update 1-rst contact's `group` field
-		peterPanNew := dataSource.AssignContactToGroup(batchContacts[0], types.Gopher)
-		if peterPanNew.UUID.String() != peterPan.UUID.String() {
+		newPeterPan := dataSource.AssignContactToGroup(toBeUpdatedContact, types.Gopher)
+		if newPeterPan.UUID.String() != peterPan.UUID.String() {
 			panic("OMG it's not Peter")
 		}
-		log.Printf("updated contact: %v", peterPanNew)
+		log.Printf("updated contact: %v", newPeterPan)
 
 		// find & print both contacts to ensure: now they are in a same group
 		batchContacts, err = dataSource.FindByGroup(types.Gopher)
 		if err != nil {
 			log.Printf("err: %v", err)
 		}
-
 		for _, contact := range batchContacts {
 			log.Printf("found `Gopher` contact %v\n", contact)
 		}
 	}
 }
 
-func shutdownApp() {
+func cleanOnAppShutdown(deleteAll bool) {
+	if deleteAll {
+		for _, dataSource := range booksAvailable {
+			// delete records
+			err := dataSource.Truncate()
+			if err != nil {
+				return
+			}
+			// drop databases
+			err = dataSource.Drop()
+			if err != nil {
+				return
+			}
+			// close connections
+			dataSource.Close()
+		}
+		return
+	}
 	for _, dataSource := range booksAvailable {
-		// delete records
-		err := dataSource.Truncate()
-		if err != nil {
-			return
-		}
-		// drop databases
-		err = dataSource.Drop()
-		if err != nil {
-			return
-		}
-		// close connections
 		dataSource.Close()
 	}
+	return
 }
