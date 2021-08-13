@@ -46,7 +46,7 @@ func init() {
 
 func main() {
 	// schedule app turn off
-	defer cleanOnAppShutdown(false)
+	defer cleanOnAppShutdown(true)
 
 	// prepare the contacts:
 	// create contacts with/without group and uuid
@@ -54,7 +54,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// unsafe method
+	// unsafe way
 	pinocchio = &types.Contact{
 		UUID:  nil,
 		Name:  "Пинок Карлович Кио",
