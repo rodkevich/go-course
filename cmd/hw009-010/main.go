@@ -40,7 +40,7 @@ func init() {
 
 func main() {
 	// schedule app turn off
-	// defer shutdownApp()
+	defer shutdownApp()
 
 	// prepare the contacts:
 	// create contacts with/without group and uuid
@@ -115,7 +115,7 @@ func main() {
 		}
 
 		for _, contact := range batchContacts {
-			log.Printf("found `Gopher` contact %v\n", contact.UUID)
+			log.Printf("found `Gopher` contact %v\n", contact)
 		}
 	}
 }

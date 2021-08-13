@@ -20,7 +20,7 @@ var (
 	operationsTimeOut = 10 * time.Second
 )
 
-// Represents the contactsBook model
+// Represents the contactsBook data-source
 type contactsBook struct {
 	client     *mongo.Client
 	collection *mongo.Collection
@@ -42,7 +42,7 @@ func (c contactsBook) Up() (err error) {
 	return
 }
 
-// Close ...
+// Close current data-source
 func (c contactsBook) Close() {
 	log.Println("mongo: book disconnecting ...")
 	defer log.Println("mongo: book disconnecting - done")
@@ -52,7 +52,7 @@ func (c contactsBook) Close() {
 	}
 }
 
-// Drop ...
+// Drop current data-source
 func (c contactsBook) Drop() (err error) {
 	err = c.collection.Drop(ctxDefault)
 	if err != nil {
@@ -63,16 +63,17 @@ func (c contactsBook) Drop() (err error) {
 	return
 }
 
-// Truncate ...
+// Truncate current data-source
 func (c contactsBook) Truncate() (err error) {
-	_, err = c.collection.DeleteMany(ctxDefault, bson.D{})
+	filter := bson.D{}
+	_, err = c.collection.DeleteMany(ctxDefault, filter)
 	if err != nil {
 		return
 	}
 	return
 }
 
-// Create ...
+// Create new record in current data-source
 func (c contactsBook) Create(contact *types.Contact) (recordID string, err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
@@ -84,27 +85,36 @@ func (c contactsBook) Create(contact *types.Contact) (recordID string, err error
 	return
 }
 
-// AssignContactToGroup ...
-func (c contactsBook) AssignContactToGroup(contact *types.Contact, gr types.Group) (n *types.Contact) {
-	n = new(types.Contact)
+// AssignContactToGroup change contact's group to required
+func (c contactsBook) AssignContactToGroup(contact *types.Contact, gr types.Group) (rtn *types.Contact) {
 	_, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	var (
 		stmt   = bson.M{"$set": bson.M{"group": gr}}
 		filter = bson.M{"uuid": &contact.UUID}
+		// add opts... other way will get old not updated document in return (default: before)
+		after  = options.After
+		opt    = options.FindOneAndUpdateOptions{
+			ReturnDocument: &after,
+		}
 	)
-	rtn := c.collection.FindOneAndUpdate(ctxDefault, filter, stmt).Decode(&n)
-	if rtn != nil {
-		if rtn == mongo.ErrNoDocuments {
+	res := c.collection.FindOneAndUpdate(
+		ctxDefault,
+		filter,
+		stmt,
+		&opt,
+	).Decode(&rtn)
+	if res != nil {
+		if res == mongo.ErrNoDocuments {
 			return
 		}
-		log.Println(rtn)
+		log.Println("mongo_Decode() unmarshal err: ", res)
 	}
 	return
 }
 
-// FindByGroup ...
-func (c contactsBook) FindByGroup(gr types.Group) (contacts []*types.Contact, err error) {
+// FindByGroup look up with group filter
+func (c contactsBook) FindByGroup(gr types.Group) (rtn []*types.Contact, err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	sort := options.Find() // add sort
@@ -117,9 +127,7 @@ func (c contactsBook) FindByGroup(gr types.Group) (contacts []*types.Contact, er
 	if err != nil {
 		return
 	}
-	defer cur.Close(ctxDefault)
-
-	if err = cur.All(ctx, &contacts); err != nil {
+	if err = cur.All(ctx, &rtn); err != nil {
 		log.Println(err)
 		return
 	}
@@ -129,7 +137,7 @@ func (c contactsBook) FindByGroup(gr types.Group) (contacts []*types.Contact, er
 	return
 }
 
-// NewContactsBook ...
+// NewContactsBook create new data-source instance
 func NewContactsBook() (ds cb.ContactBookDataSource, err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
