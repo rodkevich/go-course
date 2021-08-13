@@ -22,17 +22,23 @@ var (
 
 func init() {
 	// setup env
-	os.Setenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/postgres")
-	os.Setenv("MONGO_URL", "mongodb://localhost:27017")
+	err = os.Setenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/postgres")
+	if err != nil {
+		panic(err)
+	}
+	err = os.Setenv("MONGO_URL", "mongodb://localhost:27017")
+	if err != nil {
+		panic(err)
+	}
 
 	// init books
 	mongoBook, err = mongodb.NewContactsBook()
 	if err != nil {
-		log.Printf("err: %v", err)
+		panic(err)
 	}
 	pgBook, err = pg.NewContactsBook()
 	if err != nil {
-		log.Printf("err: %v", err)
+		panic(err)
 	}
 
 	booksAvailable = []book.ContactBookDataSource{pgBook, mongoBook}
@@ -46,7 +52,7 @@ func main() {
 	// create contacts with/without group and uuid
 	peterPan, err = types.NewContact("Питер Джеймсович Пэн", "+91 (123) 456-7890")
 	if err != nil {
-		log.Printf("err: %v", err)
+		panic(err)
 	}
 	pinocchio = &types.Contact{
 		UUID:  nil,
@@ -60,7 +66,7 @@ func main() {
 	// setup data-sources
 	for _, dataSource := range booksAvailable {
 		if err = dataSource.Up(); err != nil {
-			log.Printf("err: %v", err)
+			panic(err)
 		}
 	}
 
@@ -69,13 +75,13 @@ func main() {
 		// add to postgres to get generated uuid
 		uuID, err = pgBook.Create(contact)
 		if err != nil {
-			log.Printf("err: %v", err)
+			panic(err)
 		}
 
 		// convert from returned str to valid uuid type
 		decodedUUID, err := uuid.Parse(uuID)
 		if err != nil {
-			log.Printf("err: %v", err)
+			panic(err)
 		}
 
 		// set uuid to a contact field
@@ -83,7 +89,7 @@ func main() {
 		// add contact to mongo
 		uuID, err = mongoBook.Create(contact)
 		if err != nil {
-			log.Printf("err: %v", err)
+			panic(err)
 		}
 		// show in logs
 		log.Printf("pg: contact created: %v", contact.UUID)
@@ -99,7 +105,7 @@ func main() {
 		toBeUpdatedContact := batchContacts[0]
 		log.Printf("wanna update `NoGroup` contact %v\n", toBeUpdatedContact)
 		if err != nil {
-			log.Printf("err: %v", err)
+			panic(err)
 		}
 
 		// from found update 1-rst contact's `group` field
@@ -112,7 +118,7 @@ func main() {
 		// find & print both contacts to ensure: now they are in a same group
 		batchContacts, err = dataSource.FindByGroup(types.Gopher)
 		if err != nil {
-			log.Printf("err: %v", err)
+			panic(err)
 		}
 		for _, contact := range batchContacts {
 			log.Printf("found `Gopher` contact %v\n", contact)
@@ -126,12 +132,12 @@ func cleanOnAppShutdown(deleteAll bool) {
 			// delete records
 			err := dataSource.Truncate()
 			if err != nil {
-				return
+				panic(err)
 			}
 			// drop databases
 			err = dataSource.Drop()
 			if err != nil {
-				return
+				panic(err)
 			}
 			// close connections
 			dataSource.Close()
