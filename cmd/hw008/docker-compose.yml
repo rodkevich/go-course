@@ -2,10 +2,10 @@ version: "2.4"
 
 services:
   app-hw-006:
-#    build:
-#      context: ../..
-#      dockerfile: cmd/hw008/dockerfiles/DockerfileHW006
-    image: rodkevich/go-course:app6lesson
+    build:
+      context: ../..
+      dockerfile: cmd/hw008/dockerfiles/DockerfileHW006
+    #    image: rodkevich/go-course:app6lesson
     container_name: app-hw-006
     hostname: app-hw-006
     env_file:
@@ -15,10 +15,10 @@ services:
     links:
       - app-hw-008
   app-hw-008:
-#    build:
-#      context: ../..
-#      dockerfile: cmd/hw008/dockerfiles/DockerfileHW008
-    image: rodkevich/go-course:app8lesson
+    build:
+      context: ../..
+      dockerfile: cmd/hw008/dockerfiles/DockerfileHW008
+    #    image: rodkevich/go-course:app8lesson
     container_name: app-hw-008
     hostname: app-hw-008
     env_file:

@@ -137,7 +137,7 @@ func NewWebServer() *WebServer {
 
 // Run start a new server instance
 func (s WebServer) Run() {
-	fmt.Println("Using localhost:", s.PortToServe)
+	fmt.Println("Using localhost", s.PortToServe)
 	r := mux.NewRouter()
 	r.HandleFunc("/", s.solutionHandler).Methods("GET", "POST")
 	http.Handle("/", r)
