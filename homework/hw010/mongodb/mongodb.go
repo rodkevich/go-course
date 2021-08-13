@@ -27,12 +27,12 @@ type contactsBook struct {
 	ctx        context.Context
 }
 
-func (c contactsBook) String() string {
+func (c *contactsBook) String() string {
 	return "Mongo"
 }
 
 // Up ...
-func (c contactsBook) Up() (err error) {
+func (c *contactsBook) Up() (err error) {
 	err = c.client.Ping(ctxDefault, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -43,7 +43,7 @@ func (c contactsBook) Up() (err error) {
 }
 
 // Close current data-source
-func (c contactsBook) Close() {
+func (c *contactsBook) Close() {
 	log.Println("mongo: book disconnecting ...")
 	defer log.Println("mongo: book disconnecting - done")
 	err := c.client.Disconnect(ctxDefault)
@@ -53,7 +53,7 @@ func (c contactsBook) Close() {
 }
 
 // Drop current data-source
-func (c contactsBook) Drop() (err error) {
+func (c *contactsBook) Drop() (err error) {
 	err = c.collection.Drop(ctxDefault)
 	if err != nil {
 		log.Fatal(err)
@@ -64,7 +64,7 @@ func (c contactsBook) Drop() (err error) {
 }
 
 // Truncate current data-source
-func (c contactsBook) Truncate() (err error) {
+func (c *contactsBook) Truncate() (err error) {
 	filter := bson.D{}
 	_, err = c.collection.DeleteMany(ctxDefault, filter)
 	if err != nil {
@@ -74,7 +74,7 @@ func (c contactsBook) Truncate() (err error) {
 }
 
 // Create new record in current data-source
-func (c contactsBook) Create(contact *types.Contact) (recordID string, err error) {
+func (c *contactsBook) Create(contact *types.Contact) (recordID string, err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	rtn, err := c.collection.InsertOne(ctx, contact)
@@ -86,7 +86,7 @@ func (c contactsBook) Create(contact *types.Contact) (recordID string, err error
 }
 
 // AssignContactToGroup change contact's group to required
-func (c contactsBook) AssignContactToGroup(contact *types.Contact, gr types.Group) (rtn *types.Contact) {
+func (c *contactsBook) AssignContactToGroup(contact *types.Contact, gr types.Group) (rtn *types.Contact) {
 	_, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	var (
@@ -114,7 +114,7 @@ func (c contactsBook) AssignContactToGroup(contact *types.Contact, gr types.Grou
 }
 
 // FindByGroup look up with group filter
-func (c contactsBook) FindByGroup(gr types.Group) (rtn []*types.Contact, err error) {
+func (c *contactsBook) FindByGroup(gr types.Group) (rtn []*types.Contact, err error) {
 	ctx, cancel := context.WithTimeout(ctxDefault, operationsTimeOut)
 	defer cancel()
 	sort := options.Find() // add sort
