@@ -75,12 +75,12 @@ func main() {
 		var hasErrors bool
 		err = contact.Phone.CheckValidity(contact.Phone)
 		if err != nil {
-			log.Printf("warn: %v invalid. reason: %v\n", contact.Name, contact.Phone)
+			log.Printf("warn: %v abbadoned, %v", contact.Name, err)
 			hasErrors = true
 		}
 		err = contact.Group.CheckValidity(contact.Group)
 		if err != nil {
-			log.Printf("warn: %v invalid. reason: %v\n", contact.Name, contact.Group)
+			log.Printf("warn: %v abbadoned, %v", contact.Name, err)
 			hasErrors = true
 		}
 		// skip corrupted contacts
