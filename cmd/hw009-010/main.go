@@ -46,7 +46,7 @@ func init() {
 
 func main() {
 	// schedule app turn off
-	defer cleanOnAppShutdown(true)
+	defer cleanOnAppShutdown(false)
 
 	// prepare the contacts:
 	// create contacts with/without group and uuid
@@ -54,6 +54,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	// unsafe method
 	pinocchio = &types.Contact{
 		UUID:  nil,
 		Name:  "Пинок Карлович Кио",
@@ -61,7 +62,32 @@ func main() {
 		Group: types.Gopher,
 	}
 
-	batchContacts = append(batchContacts, peterPan, pinocchio)
+	invalid := &types.Contact{
+		UUID:  nil,
+		Name:  "Не будет создан",
+		Phone: "111.222.3333",
+		Group: types.Javascriptizer,
+	}
+
+	// validate then add to batch
+	var contactsToValidate = []*types.Contact{peterPan, pinocchio, invalid}
+	for _, contact := range contactsToValidate {
+		var hasErrors bool
+		err = contact.Phone.CheckValidity(contact.Phone)
+		if err != nil {
+			log.Printf("warn: %v invalid. reason: %v\n", contact.Name, contact.Phone)
+			hasErrors = true
+		}
+		err = contact.Group.CheckValidity(contact.Group)
+		if err != nil {
+			log.Printf("warn: %v invalid. reason: %v\n", contact.Name, contact.Group)
+			hasErrors = true
+		}
+		// skip corrupted contacts
+		if hasErrors == false {
+			batchContacts = append(batchContacts, contact)
+		}
+	}
 
 	// setup data-sources
 	for _, dataSource := range booksAvailable {
