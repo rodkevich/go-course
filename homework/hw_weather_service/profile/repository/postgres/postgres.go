@@ -76,7 +76,7 @@ func (r *repository) Close() {
 func (r *repository) Create(person *repo.PersonModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	var personId string
+	var personID string
 	query := "INSERT INTO person (" +
 		"project_id, " +
 		"description" +
@@ -84,12 +84,12 @@ func (r *repository) Create(person *repo.PersonModel) (string, error) {
 		"returning person_id;"
 	err := r.db.QueryRow(
 		ctx, query,
-		person.Description).Scan(&personId)
+		person.Description).Scan(&personID)
 	if err != nil {
-		return personId, err
+		return personID, err
 	}
-	fmt.Printf("SCAN - Successfully created user with id %v\n", personId)
-	return personId, nil
+	fmt.Printf("SCAN - Successfully created user with id %v\n", personID)
+	return personID, nil
 }
 
 // Find attaches the person repository and finds all the data
