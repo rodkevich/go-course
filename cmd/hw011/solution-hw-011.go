@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 )
 
 type Fetcher interface {
@@ -9,6 +10,12 @@ type Fetcher interface {
 	// a slice of URLs found on that page.
 	Fetch(url string) (body string, urls []string, err error)
 }
+
+var (
+	unique []string
+	cache = map[string]bool{}
+	wg sync.WaitGroup
+)
 
 // Crawl uses fetcher to recursively crawl
 // pages starting with url, to a maximum of depth.
@@ -25,9 +32,16 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 		return
 	}
 	fmt.Printf("found: %s %q\n", url, body)
-	for _, u := range urls {
-		Crawl(u, depth-1, fetcher)
+	for _, eachUrl := range urls {
+		if !cache[eachUrl] {
+			cache[eachUrl] = true
+			unique = append(unique, eachUrl)
+			wg.Add(1) // 2
+			go Crawl(eachUrl, depth-1, fetcher)
+		}
 	}
+	wg.Done()
+	wg.Wait()
 	return
 }
 
