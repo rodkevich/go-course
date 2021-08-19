@@ -3,50 +3,81 @@ package main
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
+// Fetcher ...
 type Fetcher interface {
 	// Fetch returns the body of URL and
 	// a slice of URLs found on that page.
 	Fetch(url string) (body string, urls []string, err error)
 }
 
-var (
-	unique []string
-	cache = map[string]bool{}
-	wg sync.WaitGroup
-)
-
 // Crawl uses fetcher to recursively crawl
 // pages starting with url, to a maximum of depth.
-func Crawl(url string, depth int, fetcher Fetcher) {
-	// TODO: Fetch URLs in parallel.
-	// TODO: Don't fetch the same URL twice.
-	// This implementation doesn't do either:
-	if depth <= 0 {
-		return
+func Crawl(url string, depth int, fetcher Fetcher, cacheCheckChannel chan *map[string]interface{}) {
+	start := time.Now()
+	defer func() {
+		fmt.Println(time.Since(start).Nanoseconds())
+	}()
+	time.Sleep(time.Nanosecond * 2)
+
+	type (
+		memo struct {
+			mu      sync.Mutex
+			content map[string]interface{}
+		}
+		fetchResult struct {
+			url   string
+			body  string
+			urls  []string
+			err   error
+			depth int
+		}
+	)
+
+	funcContextChannel := make(chan *fetchResult)
+	cache := memo{
+		mu:      sync.Mutex{},
+		content: map[string]interface{}{},
 	}
-	body, urls, err := fetcher.Fetch(url)
-	if err != nil {
-		fmt.Println(err)
-		return
+
+	fetchClosure := func(url string, depth int) {
+		body, urls, err := fetcher.Fetch(url)
+		funcContextChannel <- &fetchResult{url, body, urls, err, depth}
 	}
-	fmt.Printf("found: %s %q\n", url, body)
-	for _, eachUrl := range urls {
-		if !cache[eachUrl] {
-			cache[eachUrl] = true
-			unique = append(unique, eachUrl)
-			wg.Add(1) // 2
-			go Crawl(eachUrl, depth-1, fetcher)
+	go fetchClosure(url, depth)
+	cache.content[url] = nil
+	for i := 1; i > 0; i-- {
+		res := <-funcContextChannel
+		if res.err != nil {
+			fmt.Println(res.err)
+			continue
+		}
+		fmt.Printf("found: %s %q\n", res.url, res.body)
+		if res.depth > 0 {
+			for _, entry := range res.urls {
+				if _, presented := cache.content[entry]; !presented {
+					cache.mu.Lock()
+					i++
+					go fetchClosure(entry, res.depth-1)
+					cache.content[entry] = nil
+					cache.mu.Unlock()
+				}
+			}
 		}
 	}
-	wg.Done()
-	wg.Wait()
-	return
+	close(funcContextChannel)
+	cacheCheckChannel <- &cache.content
+	close(cacheCheckChannel)
 }
 
 func main() {
-	Crawl("https://golang.org/", 4, fetcher)
+	var mainChannel = make(chan *map[string]interface{})
+	go Crawl("https://golang.org/", 4, fetcher, mainChannel)
+	for i := range mainChannel {
+		fmt.Println(i)
+	}
 }
 
 // fakeFetcher is Fetcher that returns canned results.
