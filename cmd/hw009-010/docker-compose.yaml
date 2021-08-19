@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2000M
+    env_file:
+      - ../../homework/hw009/book/pg/database.env
+    ports:
+      - "5432:5432"
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2000M
+    ports:
+      - "27017:27017"
+#    volumes:
+#      - ./init_mongo.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
