@@ -15,41 +15,50 @@ type Fetcher interface {
 
 // Crawl uses fetcher to recursively crawl
 // pages starting with url, to a maximum of depth.
-func Crawl(url string, depth int, fetcher Fetcher, cacheCheckChannel chan *map[string]interface{}) {
+func Crawl(url string, depth int, fetcher Fetcher, mainChannel chan *map[string]interface{}) {
 	start := time.Now()
 	defer func() {
 		fmt.Println(time.Since(start).Nanoseconds())
 	}()
 	time.Sleep(time.Nanosecond * 2)
 
-	type (
-		memo struct {
-			mu      sync.Mutex
-			content map[string]interface{}
-		}
-		fetchResult struct {
-			url   string
-			body  string
-			urls  []string
-			err   error
-			depth int
-		}
-	)
+	type memo struct {
+		*sync.Mutex
+		content map[string]interface{}
+	}
+	type fetchResult struct {
+		url   string
+		err   error
+		depth int
+		*fakeResult
+	}
 
-	funcContextChannel := make(chan *fetchResult)
-	cache := memo{
-		mu:      sync.Mutex{},
+	inFunctionChannel := make(chan *fetchResult)
+	cache := &memo{
+		Mutex:   &sync.Mutex{},
 		content: map[string]interface{}{},
 	}
 
 	fetchClosure := func(url string, depth int) {
 		body, urls, err := fetcher.Fetch(url)
-		funcContextChannel <- &fetchResult{url, body, urls, err, depth}
+		inFunctionChannel <- &fetchResult{
+			url:   url,
+			err:   err,
+			depth: depth,
+			fakeResult: &fakeResult{
+				body: body,
+				urls: urls,
+			},
+		}
 	}
+
+	var alreadyMet interface{} = nil // alias just for readability
+	// deal with a first fetch
 	go fetchClosure(url, depth)
-	cache.content[url] = nil
+	cache.content[url] = alreadyMet
+
 	for i := 1; i > 0; i-- {
-		res := <-funcContextChannel
+		res := <-inFunctionChannel
 		if res.err != nil {
 			fmt.Println(res.err)
 			continue
@@ -58,18 +67,18 @@ func Crawl(url string, depth int, fetcher Fetcher, cacheCheckChannel chan *map[s
 		if res.depth > 0 {
 			for _, entry := range res.urls {
 				if _, presented := cache.content[entry]; !presented {
-					cache.mu.Lock()
+					cache.Lock()
 					i++
 					go fetchClosure(entry, res.depth-1)
-					cache.content[entry] = nil
-					cache.mu.Unlock()
+					cache.content[entry] = alreadyMet
+					cache.Unlock()
 				}
 			}
 		}
 	}
-	close(funcContextChannel)
-	cacheCheckChannel <- &cache.content
-	close(cacheCheckChannel)
+	close(inFunctionChannel)
+	mainChannel <- &cache.content
+	close(mainChannel)
 }
 
 func main() {
