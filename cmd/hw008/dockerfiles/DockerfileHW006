@@ -1,0 +1,25 @@
+FROM golang:1.16 AS builder
+LABEL maintainer="ivan.rodkevich"
+
+ENV GO111MODULE=auto
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+#ENV GOBIN=/go/bin/
+
+RUN go get -d -v github.com/gorilla/mux
+
+WORKDIR /go/src/github.com/rodkevich/go-course
+COPY . .
+WORKDIR /go/src/github.com/rodkevich/go-course/cmd/hw006/task3/
+
+RUN go build -ldflags="-s -w" ./main.go
+
+
+FROM scratch
+
+COPY --from=builder /go/src/github.com/rodkevich/go-course/cmd/hw006/task3/static ./static
+COPY --from=builder /go/src/github.com/rodkevich/go-course/cmd/hw006/task3/main .
+
+EXPOSE 5050
+
+CMD ["./main"]
