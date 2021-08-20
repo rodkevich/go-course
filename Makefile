@@ -85,6 +85,16 @@ create-homework-dirs:
 		touch hw$${LESSON_NUMBER}/test/hw$${LESSON_NUMBER}/hw-$${LESSON_NUMBER}_test.go; \
 		touch hw$${LESSON_NUMBER}/docs/hw$${LESSON_NUMBER}/hw-$${LESSON_NUMBER}_notes.yml; \
 
+proto-gen-users:
+	@echo "--> Generating gRPC clients"
+	protoc -I ./homework/hw007/api/v1/users/proto users.proto \
+		--go_out=,paths=source_relative:./homework/hw007/api/v1/users \
+		--go-grpc_out=,paths=source_relative:./homework/hw007/api/v1/users
+
+proto-evans:
+	firefox -new-tab "https://github.com/ktr0731/evans"
+	# evans /home/ioan/Desktop/code/src/github.com/rodkevich/go-course/homework/hw007/api/v1/users.proto -p 9090
+
 lint:
 	revive -formatter stylish ./... ;\
 	golangci-lint run  ./...
