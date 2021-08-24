@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/rodkevich/go-course/homework/hw_weather_service/profile/repository"
-	"github.com/rodkevich/go-course/homework/hw_weather_service/profile/repository/postgres"
 	"os"
+
+	repo "github.com/rodkevich/go-course/homework/hw_weather_service/profile/repository"
+	"github.com/rodkevich/go-course/homework/hw_weather_service/profile/repository/postgres"
 )
 
 func main() {
 	_ = os.Setenv("DATABASE_URL", "postgresql://postgres:postgres@0.0.0.0:5432/postgres")
 
 	var (
-		rep repository.Repository
+		rep repo.Repository
 		err error
 	)
 
@@ -27,6 +28,6 @@ func main() {
 	}
 
 	// persons list
-	var _ []*repository.PersonModel
+	var _ []*repo.PersonModel
 
 }

@@ -9,10 +9,16 @@ import (
 
 	"github.com/rodkevich/go-course/homework/hw_weather_service/gateway/graph/generated"
 	"github.com/rodkevich/go-course/homework/hw_weather_service/gateway/graph/model"
+	"github.com/rodkevich/go-course/homework/hw_weather_service/history"
 )
 
-func (r *mutationResolver) CreateUser(ctx context.Context, user model.UserInput) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserInput) (*model.User, error) {
+	hs := history.Record{
+		TraceID:   "",
+		LogString: nil,
+	}
+	println(hs)
+	return nil, nil
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, changes map[string]interface{}) (*model.User, error) {
@@ -28,10 +34,6 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 }
 
 func (r *queryResolver) GetCityWeatherByName(ctx context.Context, name string, country *string, config *model.ConfigInput) (*model.City, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *queryResolver) GetCityWeatherByID(ctx context.Context, id []string, config *model.ConfigInput) ([]*model.City, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

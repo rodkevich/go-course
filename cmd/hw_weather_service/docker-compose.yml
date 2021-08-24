@@ -2,14 +2,14 @@ version: "3"
 
 services:
 
-  hw_weather_service_envoy:
-    build:
-      context: ../../homework/hw_weather_service/
-      dockerfile: envoy/Dockerfile
-    container_name: hw_weather_service_envoy
-    image: hw_weather_service_envoy
-    ports:
-      - "8080:8080"
+  #  hw_weather_service_envoy:
+  #    build:
+  #      context: ../../homework/hw_weather_service/
+  #      dockerfile: envoy/Dockerfile
+  #    container_name: hw_weather_service_envoy
+  #    image: hw_weather_service_envoy
+  #    ports:
+  #      - "8080:8080"
 
   hw_weather_service_es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
@@ -96,18 +96,15 @@ services:
         limits:
           cpus: "2"
           memory:
-            3000M
+            4000M
     ports:
       - "5601:5601"
     environment:
       ELASTICSEARCH_URL: http://hw_weather_service_es01:9200
-      ELASTICSEARCH_HOSTS: '[
-      "http://hw_weather_service_es01:9200",
-      "http://hw_weather_service_es02:9200",
-      "http://hw_weather_service_es03:9200"
-      ]'
+      ELASTICSEARCH_HOSTS: '["http://hw_weather_service_es01:9200","http://hw_weather_service_es02:9200","http://hw_weather_service_es03:9200"]'
     networks:
       - hw_weather_service
+    depends_on: [ "hw_weather_service_es01", "hw_weather_service_es02", "hw_weather_service_es03" ]
 
 volumes:
   data01:

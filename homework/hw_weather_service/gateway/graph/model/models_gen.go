@@ -47,7 +47,7 @@ type Temperature struct {
 }
 
 type User struct {
-	ID          string       `json:"ID"`
+	ID          *string      `json:"ID"`
 	CreatedAt   time.Time    `json:"createdAt"`
 	UpdatedAt   time.Time    `json:"updatedAt"`
 	Description string       `json:"description"`

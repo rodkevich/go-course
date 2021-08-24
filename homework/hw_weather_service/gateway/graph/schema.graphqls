@@ -4,19 +4,23 @@ schema {
 }
 
 type Query {
+    "Get user info"
     user(id: ID!): User
+    "Get all users"
     users: [User!]!
+    "Get weather for a city"
     getCityWeatherByName(name: String!, country: String, config: ConfigInput): City
-    getCityWeatherById(id: [String!], config: ConfigInput): [City]
 }
 
 type Mutation {
-    CreateUser(user: UserInput!): User! @hasRole(role: ADMIN)
+    "Create a new user"
+    CreateUser(input: UserInput!): User! @hasRole(role: ADMIN)
+    "Update existing user"
     UpdateUser(id: ID!, changes: Map!): User @hasRole(role: ADMIN)
 }
 
 type User {
-    ID: ID!
+    ID: ID
     createdAt: Time!
     updatedAt: Time!
     description: String!
