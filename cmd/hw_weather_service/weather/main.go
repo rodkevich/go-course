@@ -1,33 +1,33 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
-	"time"
 
-	"github.com/rodkevich/go-course/homework/hw_weather_service/history"
-	"github.com/rodkevich/go-course/homework/hw_weather_service/weather"
+	historyService "github.com/rodkevich/go-course/homework/hw_weather_service/history"
+	weatherService "github.com/rodkevich/go-course/homework/hw_weather_service/weather"
+	"github.com/rodkevich/go-course/homework/hw_weather_service/weather/types"
 
 	"github.com/gin-gonic/gin"
 )
 
+const serviceName = "final_weather_service"
+
 var (
 	port          = os.Getenv("WEATHERSERVICEPORT")
-	weatherApiKey = os.Getenv("WEATHERSERVICEAPIKEY")
-	clientOW      *weather.Client
-	clientH       *history.Client
+	weather       *weatherService.Client
+	history       *historyService.Client
 )
-var db = make(map[string]string)
+var users = make(map[string]string)
 
 func init() {
-	clientOW = weather.NewOpenWeatherClient(
+	weather = weatherService.NewOpenWeatherClient(
 		"https://api.openweathermap.org",
-		"weather_service",
+		serviceName,
 		"5e829817fc17ff78e515f532fa65302e",
 		"metric",
 	)
-	clientH = history.NewClient()
+	history = historyService.NewEsClient(serviceName)
 }
 
 func setupRouter() (engine *gin.Engine) {
@@ -40,26 +40,33 @@ func setupRouter() (engine *gin.Engine) {
 		// 	return
 		// }
 		cityName := c.Param("name")
-		rtn, err := clientOW.GetWeatherByCityName(cityName)
+		rtn, err := weather.GetByCityName(cityName)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "check your request"})
+			c.JSON(http.StatusBadRequest, gin.H{"error get city": "check your request"})
 			return
 		}
 		c.Header("Content-Type", "application/json")
 		c.JSON(http.StatusOK, gin.H{"status": "ok", "entry": rtn})
 	})
 
-	// engine.GET("/logs/:text", func(c *gin.Context) {
-	engine.GET("/logs", func(c *gin.Context) {
-		t := time.Now()
-		defer func() {
-			fmt.Println(time.Since(t).Seconds())
-		}()
-		var text string
-		// text = c.Param("text")
-		text = "weather_service_ES_logging"
+	engine.POST("/logs/create", func(c *gin.Context) {
+		var req types.LogPostRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		rtn, err := history.Save(req.Title)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error post logs": "Check your request"})
+			return
+		}
+		c.Header("Content-Type", "application/json")
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "entry": rtn})
+	})
 
-		rtn := clientH.WriteToIndex("test", text)
+	engine.GET("/logs/:querySearch", func(c *gin.Context) {
+		querySearch := c.Params.ByName("querySearch")
+		rtn, _ := history.SearchForEntries(querySearch)
 		// if err != nil {
 		// 	c.JSON(http.StatusBadRequest, gin.H{"status": "400", "error": "Check your request"})
 		// 	return
@@ -71,7 +78,7 @@ func setupRouter() (engine *gin.Engine) {
 	// Get user value
 	engine.GET("/user/:name", func(c *gin.Context) {
 		user := c.Params.ByName("name")
-		value, ok := db[user]
+		value, ok := users[user]
 		if ok {
 			c.JSON(http.StatusOK, gin.H{"user": user, "value": value})
 		} else {
@@ -87,8 +94,7 @@ func setupRouter() (engine *gin.Engine) {
 	//	  "manu": "123",
 	// }))
 	authorized := engine.Group("/", gin.BasicAuth(gin.Accounts{
-		"foo":  "bar", // user:foo password:bar
-		"manu": "123", // user:manu password:123
+		"foo": "bar", // user:foo password:bar
 	}))
 
 	/* example curl for /admin with basicauth header
@@ -108,9 +114,9 @@ func setupRouter() (engine *gin.Engine) {
 		}
 
 		if c.Bind(&json) == nil {
-			db[user] = json.Value
+			users[user] = json.Value
 			cityName := "name"
-			rtn, err := clientOW.GetWeatherByCityName(cityName)
+			rtn, err := weather.GetByCityName(cityName)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "check your request"})
 				return

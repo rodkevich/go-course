@@ -34,21 +34,20 @@ func NewOpenWeatherClient(baseURL string, userAgent string, apiKey string, units
 	return &Client{Client: &http.Client{}, BaseURL: baseURL, UserAgent: userAgent, apiKey: apiKey, units: units}
 }
 
-// GetWeatherByCityName ...
-func (cl *Client) GetWeatherByCityName(cityName string) (rtn types.TemperatureResponse, err error) {
+// GetByCityName ...
+func (cl *Client) GetByCityName(cityName string) (rtn types.TemperatureResponse, err error) {
 	method := "GET"
-	url := fmt.Sprintf("%s/data/2.5/weather?q=%s", cl.BaseURL, cityName)
+	url := fmt.Sprintf("%s/data/2.5/weather?que=%s", cl.BaseURL, cityName)
 	req, err = http.NewRequest(method, url, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
-	q := req.URL.Query()
-	q.Add("q", cityName)
-	q.Add("appid", cl.apiKey)
-	q.Add("units", cl.units)
-	req.URL.RawQuery = q.Encode()
+	que := req.URL.Query()
+	que.Add("que", cityName)
+	que.Add("appid", cl.apiKey)
+	que.Add("units", cl.units)
+	req.URL.RawQuery = que.Encode()
 
 	response, err = cl.Do(req)
 	if err != nil {

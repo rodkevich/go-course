@@ -1,86 +1,73 @@
 package elk
 
 import (
-	"log"
-	"os"
-	"strings"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"time"
 
-	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/elastic/go-elasticsearch/v8/estransport"
-
-	"github.com/rodkevich/go-course/homework/hw_weather_service/history"
+	"github.com/rs/zerolog"
 )
 
-
-type historyService struct {
-	es *history.Client
+// CustomLogger implements the estransport.Logger interface.
+//
+type CustomLogger struct {
+	zerolog.Logger
 }
 
-// Store ...
-func (h historyService) Store(record *history.Record) (rtn string, err error) {
-	r, _ := h.es.Index(
-		"weather_service_logging",
-		strings.NewReader(`{"title" : "weather_service_logging"}`),
-		h.es.Index.WithRefresh("true"),
-		h.es.Index.WithPretty(),
-		h.es.Index.WithFilterPath("result", "_id"),
-	)
-	return r.String(), nil
-}
-
-// ShowStored ...
-func (h historyService) ShowStored() {
-	panic("implement me")
-}
-
-// NewHistoryService ...
-func NewHistoryService() (history.Historiador, error) {
-	log.SetFlags(0)
-	var es *elasticsearch.Client
-	es, _ = elasticsearch.NewClient(elasticsearch.Config{
-		Logger: &estransport.JSONLogger{Output: os.Stdout},
-	})
-	return &historyService{es: es}, nil
-}
-
-func main() {
-	log.SetFlags(0)
-
-	var es *elasticsearch.Client
-
-	// ==============================================================================================
-	//
-	// "JSONLogger" writes the information as JSON and is suitable for production logging.
-	//
-	es, _ = elasticsearch.NewClient(elasticsearch.Config{
-		Logger: &estransport.JSONLogger{Output: os.Stdout},
-	})
-	run(es, "JSON")
-}
-
-// ------------------------------------------------------------------------------------------------
-
-func run(es *elasticsearch.Client, name string) {
-	// es.Delete("test", "1")
-	// es.Exists("test", "1")
-	// es.Search(es.Search.WithQuery("{FAIL"))
-	res, err := es.Search(
-		es.Search.WithIndex("test"),
-		es.Search.WithBody(strings.NewReader(`{"query" : {"match" : { "title" : "weather_service_logging" } } }`)),
-		es.Search.WithSize(1),
-		es.Search.WithPretty(),
-		es.Search.WithFilterPath("took", "hits.hits"),
+// LogRoundTrip prints the information about request and response.
+//
+func (l *CustomLogger) LogRoundTrip(
+	req *http.Request,
+	res *http.Response,
+	err error,
+	start time.Time,
+	dur time.Duration,
+) error {
+	var (
+		e    *zerolog.Event
+		nReq int64
+		nRes int64
 	)
 
-	s := res.String()
-	// log.Println("\x1b[1mResponse:\x1b[0m", s)
-	if len(s) <= len("[200 OK] ") {
-		log.Fatal("Response body is empty")
+	// Set error level.
+	//
+	switch {
+	case err != nil:
+		e = l.Error()
+	case res != nil && res.StatusCode > 0 && res.StatusCode < 300:
+		e = l.Info()
+	case res != nil && res.StatusCode > 299 && res.StatusCode < 500:
+		e = l.Warn()
+	case res != nil && res.StatusCode > 499:
+		e = l.Error()
+	default:
+		e = l.Error()
 	}
 
-	if err != nil {
-		log.Fatalf("Error:   %s", err)
+	// Count number of bytes in request and response.
+	//
+	if req != nil && req.Body != nil && req.Body != http.NoBody {
+		nReq, _ = io.Copy(ioutil.Discard, req.Body)
+	}
+	if res != nil && res.Body != nil && res.Body != http.NoBody {
+		nRes, _ = io.Copy(ioutil.Discard, res.Body)
 	}
 
-	log.Print("\n")
+	// Log event.
+	//
+	e.Str("method", req.Method).
+		Int("status_code", res.StatusCode).
+		Dur("duration", dur).
+		Int64("req_bytes", nReq).
+		Int64("res_bytes", nRes).
+		Msg(req.URL.String())
+
+	return nil
 }
+
+// RequestBodyEnabled makes the client pass request body to logger
+func (l *CustomLogger) RequestBodyEnabled() bool { return true }
+
+// ResponseBodyEnabled makes the client pass response body to logger
+func (l *CustomLogger) ResponseBodyEnabled() bool { return true }

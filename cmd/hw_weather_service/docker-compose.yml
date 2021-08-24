@@ -1,16 +1,6 @@
 version: "3"
 
 services:
-
-  #  hw_weather_service_envoy:
-  #    build:
-  #      context: ../../homework/hw_weather_service/
-  #      dockerfile: envoy/Dockerfile
-  #    container_name: hw_weather_service_envoy
-  #    image: hw_weather_service_envoy
-  #    ports:
-  #      - "8080:8080"
-
   hw_weather_service_es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
     container_name: hw_weather_service_es01
