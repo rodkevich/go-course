@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	req          *http.Request
-	response     *http.Response
-	responseBody []byte
-	res          types.WeatherApiResponse
+	req                 *http.Request
+	response            *http.Response
+	responseBody        []byte
+	openWeatherResponse types.WeatherApiResponse
 )
 
 // Client ...
@@ -35,9 +35,15 @@ func NewOpenWeatherClient(baseURL string, userAgent string, apiKey string, units
 }
 
 // GetByCityName ...
-func (cl *Client) GetByCityName(cityName string) (rtn types.TemperatureResponse, err error) {
+func (cl *Client) GetByCityName(cityName string) (cityWeather string, err error) {
+
 	method := "GET"
-	url := fmt.Sprintf("%s/data/2.5/weather?que=%s", cl.BaseURL, cityName)
+	url := fmt.Sprintf(
+		"%s/data/2.5/weather?q=%s",
+		cl.BaseURL,
+		cityName,
+	)
+
 	req, err = http.NewRequest(method, url, nil)
 	if err != nil {
 		fmt.Println(err)
@@ -60,13 +66,28 @@ func (cl *Client) GetByCityName(cityName string) (rtn types.TemperatureResponse,
 		fmt.Println(err)
 		return
 	}
-	err = json.Unmarshal(responseBody, &res)
+	err = json.Unmarshal(responseBody, &openWeatherResponse)
 	if err != nil {
 		return
 	}
-	rtn.CityID = res.Id
-	rtn.City = res.Name
-	rtn.TimeRequested = time.Now().UTC().Format("2006-01-02T15:04:05.999Z")
-	rtn.Temperature = res.Main.Temp
+
+	type Rtn struct {
+		CityID        int
+		City          string
+		TimeRequested string
+		Temperature   float64
+	}
+	rtn := &Rtn{
+		CityID:        openWeatherResponse.Id,
+		City:          openWeatherResponse.Name,
+		TimeRequested: time.Now().UTC().Format("2006-01-02T15:04:05.999Z"),
+		Temperature:   openWeatherResponse.Main.Temp,
+	}
+	out, err := json.Marshal(rtn)
+	if err != nil {
+		panic(err)
+	}
+	cityWeather = string(out)
+	fmt.Println(cityWeather)
 	return
 }

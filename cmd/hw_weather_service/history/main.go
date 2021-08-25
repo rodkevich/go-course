@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"os"
 
@@ -10,11 +11,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const serviceName = "history_service"
+const serviceName = "history_service_001"
 
 var (
-	port    = os.Getenv("HISTORYSERVICEPORT")
-	history *historyService.Client
+	historyPort = os.Getenv("HISTORYPORT")
+	history     *historyService.Client
 )
 
 func init() {
@@ -25,7 +26,7 @@ func setupRouter() (engine *gin.Engine) {
 	engine = gin.Default()
 
 	authorized := engine.Group("/", gin.BasicAuth(gin.Accounts{
-		"foo": "bar", // user:foo password:bar
+		"gopher": "historyService", // "Basic Z29waGVyOmhpc3RvcnlTZXJ2aWNl"
 	}))
 
 	authorized.POST("/logs/create", func(c *gin.Context) {
@@ -51,13 +52,36 @@ func setupRouter() (engine *gin.Engine) {
 			return
 		}
 		c.Header("Content-Type", "application/json")
-		c.JSON(http.StatusOK, gin.H{"status": "ok", "entry": rtn})
+		// c.JSON(http.StatusOK, gin.H{"status": "ok", "entry": rtn})
+		c.String(http.StatusOK, rtn)
 	})
-	return
+	return engine
 }
 
 func main() {
-	port = "9090"
+	// port = "9091"
 	r := setupRouter()
-	r.Run(":" + port)
+	err := r.Run(":" + historyPort)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
+
+/*
+For NO auth just remove headers. You'll get 401 status code error
+
+GET With auth:
+
+curl --location --request GET 'http://localhost:9091/logs/this%20will%20be%20logged' \
+--header 'Authorization: Basic Z29waGVyOmhpc3RvcnlTZXJ2aWNl'
+
+POST With auth:
+
+curl --location --request POST 'http://localhost:9091/logs/create' \
+--header 'Authorization: Basic Z29waGVyOmhpc3RvcnlTZXJ2aWNl' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "title": "this text will be logged"
+}'
+
+*/

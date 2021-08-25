@@ -15,17 +15,13 @@ import (
 	"github.com/elastic/go-elasticsearch/estransport"
 )
 
-// Record ...
-type Record struct {
-	TraceID   string
-	LogString map[string]interface{}
-}
+var (
+	es1 = os.Getenv("ES01")
+	es2 = os.Getenv("ES02")
+	es3 = os.Getenv("ES03")
+)
 
-// NewRecord ...
-func NewRecord(traceID string, record map[string]interface{}) *Record {
-	return &Record{TraceID: traceID, LogString: record}
-}
-
+// Client ...
 type Client struct {
 	// HTTP client used to make requests.
 	*elasticsearch.Client
@@ -35,6 +31,12 @@ type Client struct {
 // NewEsClient ...
 func NewEsClient(indexName string) *Client {
 	cfg := elasticsearch.Config{
+		Addresses: []string{
+			es1,
+			es2,
+			es3,
+			"http://localhost:9200",
+		},
 		RetryOnStatus: []int{429, 502, 503, 504},
 		RetryBackoff: func(i int) time.Duration {
 			duration := time.Duration(math.Exp2(float64(i))) * time.Second
@@ -52,20 +54,20 @@ func NewEsClient(indexName string) *Client {
 
 // Save ...
 func (c *Client) Save(title string) (rtn map[string]interface{}, err error) {
-	// Build the request body.
+	// Compose request body
 	var b strings.Builder
 	b.WriteString(`{"title" : "`)
 	b.WriteString(title)
 	b.WriteString(`"}`)
 
-	// Set up the request object.
+	// Create request object
 	req := esapi.IndexRequest{
 		Index:   c.IndexName,
 		Body:    strings.NewReader(b.String()),
 		Refresh: "true",
 	}
 
-	// Perform the request with the client.
+	// Perform the request
 	res, err := req.Do(context.Background(), c)
 	if err != nil {
 		log.Fatalf("Error getting response: %s", err)
@@ -75,12 +77,16 @@ func (c *Client) Save(title string) (rtn map[string]interface{}, err error) {
 	if res.IsError() {
 		log.Printf("[%s] Error indexing document ID=%d", res.Status())
 	} else {
-		// Deserialize the response into a map.
+		// Response into a map.
 		if err := json.NewDecoder(res.Body).Decode(&rtn); err != nil {
 			log.Printf("error: json.NewDecoder(res.Body): %s", err)
 		} else {
-			// Print the response status and indexed document version.
-			log.Printf("[%s] %s; version=%d", res.Status(), rtn["result"], int(rtn["_version"].(float64)))
+			// Response status
+			log.Printf(
+				"[%s] %s; version=%d",
+				res.Status(),
+				rtn["result"],
+				int(rtn["_version"].(float64)))
 		}
 	}
 	return
@@ -88,10 +94,11 @@ func (c *Client) Save(title string) (rtn map[string]interface{}, err error) {
 
 // SearchForEntries ...
 func (c *Client) SearchForEntries(querySearch string) (strRes string, err error) {
-	// es.Delete("test", "1")
-	// es.Exists("test", "1")
-	// es.Search(es.Search.WithQuery("{FAIL"))
-	// Build the request body.
+	// c.Delete("history", "history")
+	// c.Exists("history", "history")
+	// c.Search(es.Search.WithQuery("HELLOWORLD"))
+
+	// Compose request body
 	var b strings.Builder
 	b.WriteString(`
 	{
@@ -118,11 +125,10 @@ func (c *Client) SearchForEntries(querySearch string) (strRes string, err error)
 	log.Println("\x1b[1mResponse:\x1b[0m", strRes)
 	if len(strRes) <= len("[200 OK] ") {
 		log.Printf("Response body is empty")
-		return
 	}
 	if err != nil {
 		log.Printf("Error:   %strRes", err)
-		return
+		return "", err
 	}
 	return
 }
@@ -131,4 +137,15 @@ func (c *Client) SearchForEntries(querySearch string) (strRes string, err error)
 // type Historiador interface {
 // 	Store(record *Record) (rtn string, err error)
 // 	ShowStored()
+// }
+
+// // Record ...
+// type Record struct {
+// 	TraceID   string
+// 	LogString map[string]interface{}
+// }
+//
+// // NewRecord ...
+// func NewRecord(traceID string, record map[string]interface{}) *Record {
+// 	return &Record{TraceID: traceID, LogString: record}
 // }

@@ -1,6 +1,53 @@
 version: "3"
 
 services:
+  app-gateway:
+    build:
+      context: ../..
+      dockerfile: cmd/hw_weather_service/gateway/Dockerfile
+    container_name: app-gateway
+    hostname: app-gateway
+    env_file:
+      - ./config/.env.dev
+    ports:
+      - "10000:10000"
+    networks:
+      - hw_weather_service
+    depends_on: [ "app-weather" ]
+    links:
+      - app-history
+      - app-weather
+      - hw_weather_service_kib01
+      - hw_weather_service_es01
+
+  app-history:
+    build:
+      context: ../..
+      dockerfile: cmd/hw_weather_service/history/Dockerfile
+    container_name: app-history
+    hostname: app-history
+    env_file:
+      - ./config/.env.dev
+    ports:
+      - "9091:9091"
+    networks:
+      - hw_weather_service
+    depends_on: [ "hw_weather_service_kib01" ]
+
+  app-weather:
+    build:
+      context: ../..
+      dockerfile: cmd/hw_weather_service/weather/Dockerfile
+    container_name: app-weather
+    hostname: app-weather
+    env_file:
+      - ./config/.env.dev
+    ports:
+      - "9090:9090"
+    networks:
+      - hw_weather_service
+    depends_on: [ "app-history" ]
+
   hw_weather_service_es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
     container_name: hw_weather_service_es01
