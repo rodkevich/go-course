@@ -118,9 +118,11 @@ func (c *Client) SearchForEntries(querySearch string) (strRes string, err error)
 	log.Println("\x1b[1mResponse:\x1b[0m", strRes)
 	if len(strRes) <= len("[200 OK] ") {
 		log.Printf("Response body is empty")
+		return
 	}
 	if err != nil {
 		log.Printf("Error:   %strRes", err)
+		return
 	}
 	return
 }

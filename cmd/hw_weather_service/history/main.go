@@ -2,38 +2,62 @@ package main
 
 import (
 	"net/http"
-	"net/http/httputil"
-	"net/url"
+	"os"
+
+	historyService "github.com/rodkevich/go-course/homework/hw_weather_service/history"
+	"github.com/rodkevich/go-course/homework/hw_weather_service/weather/types"
 
 	"github.com/gin-gonic/gin"
 )
 
-func proxy(c *gin.Context) {
-	remote, err := url.Parse("http://myremotedomain.com")
-	if err != nil {
-		panic(err)
-	}
+const serviceName = "history_service"
 
-	proxy := httputil.NewSingleHostReverseProxy(remote)
-	// Define the director func
-	// This is a good place to log, for example
-	proxy.Director = func(req *http.Request) {
-		req.Header = c.Request.Header
-		req.Host = remote.Host
-		req.URL.Scheme = remote.Scheme
-		req.URL.Host = remote.Host
-		req.URL.Path = c.Param("proxyPath")
-	}
+var (
+	port    = os.Getenv("HISTORYSERVICEPORT")
+	history *historyService.Client
+)
 
-	proxy.ServeHTTP(c.Writer, c.Request)
+func init() {
+	history = historyService.NewEsClient(serviceName)
+}
+
+func setupRouter() (engine *gin.Engine) {
+	engine = gin.Default()
+
+	authorized := engine.Group("/", gin.BasicAuth(gin.Accounts{
+		"foo": "bar", // user:foo password:bar
+	}))
+
+	authorized.POST("/logs/create", func(c *gin.Context) {
+		var req types.LogPostRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		rtn, err := history.Save(req.Title)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error post logs": "Check your request"})
+			return
+		}
+		c.Header("Content-Type", "application/json")
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "entry": rtn})
+	})
+
+	authorized.GET("/logs/:querySearch", func(c *gin.Context) {
+		querySearch := c.Params.ByName("querySearch")
+		rtn, err := history.SearchForEntries(querySearch)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"status": "400", "error": "Check your request"})
+			return
+		}
+		c.Header("Content-Type", "application/json")
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "entry": rtn})
+	})
+	return
 }
 
 func main() {
-
-	r := gin.Default()
-
-	// Create a catchall route
-	r.Any("/*proxyPath", proxy)
-
-	r.Run(":8080")
+	port = "9090"
+	r := setupRouter()
+	r.Run(":" + port)
 }

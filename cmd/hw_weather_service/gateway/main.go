@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -19,19 +18,14 @@ func main() {
 	}
 	proxyLogs := httputil.NewSingleHostReverseProxy(logs)
 	proxyLogs.Director = func(req *http.Request) {
-		// body := copy(body, req.Body)
-		// b, _ := ioutil.ReadAll(body)
-		// fmt.Println(string(b))
-		fmt.Println(req.BasicAuth())
 		req.Header = map[string][]string{
 			"Accept-Encoding": {"gzip, deflate"},
 			"Accept-Language": {"en-us"},
-			"Authorization":   {"Basic Zm9vOmJhcg=="},
+			"Authorization":   {"Basic Zm9vOmJhcg=="}, // set auth
 		}
 		req.Host = logs.Host
 		req.URL.Scheme = logs.Scheme
 		req.URL.Host = logs.Host
-		// req.URL.Path = c.Param("proxyPath")
 	}
 	proxyKibana := httputil.NewSingleHostReverseProxy(kibana)
 
