@@ -55,7 +55,7 @@ func NewEsClient(indexName string) *Client {
 }
 
 // SaveWithIndex ...
-func (c *Client) SaveWithIndex(ind string, r string) (rtn map[string]interface{}, err error) {
+func (c *Client) SaveWithIndex(ind string, r string) (rtn *map[string]interface{}, err error) {
 	// Create request object
 	req := esapi.IndexRequest{
 		Index:   ind,
@@ -78,12 +78,11 @@ func (c *Client) SaveWithIndex(ind string, r string) (rtn map[string]interface{}
 		if err := json.NewDecoder(res.Body).Decode(&rtn); err != nil {
 			log.Printf("error: history.client: json.NewDecoder(res.Body): %s", err)
 		} else {
-			// Response status
+			// Log response status
 			log.Printf(
-				"[%s] %s; %s",
+				"[%s] %s",
 				res.Status(),
-				rtn["result"],
-				ind+": hitory recodrd",
+				ind+": history recodrd created",
 			)
 		}
 	}

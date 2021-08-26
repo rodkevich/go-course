@@ -61,7 +61,7 @@ func main() {
 	proxyWeather.Director = func(req *http.Request) {
 		ID, _ := uuid.NewUUID()
 		req.Header = map[string][]string{
-			// set trace ID
+			// set fake trace ID for search ability
 			"traceID": {ID.String()},
 			// set auth
 			"Authorization": {"Basic Z29waGVyOmhpc3RvcnlTZXJ2aWNl"}}

@@ -13,7 +13,7 @@ WORKDIR /go/src/github.com/rodkevich/go-course
 COPY . .
 WORKDIR /go/src/github.com/rodkevich/go-course/cmd/hw_weather_service/gateway
 
-RUN go build -ldflags="-s -w" ./main.go
+RUN go build -ldflags="-s -w" ./gateway.go
 
 # server stage
 FROM scratch
@@ -24,4 +24,4 @@ COPY --from=builder /go/src/github.com/rodkevich/go-course/cmd/hw_weather_servic
 
 EXPOSE 10000
 
-CMD ["./main"]
+CMD ["./gateway"]
