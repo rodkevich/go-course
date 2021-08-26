@@ -53,8 +53,3 @@ type WeatherApiResponse struct {
 	Name     string `json:"name"`
 	Cod      int    `json:"cod"`
 }
-
-// LogPostRequest ...
-type LogPostRequest struct {
-	Title string `json:"title"`
-}

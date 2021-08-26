@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	historyService "github.com/rodkevich/go-course/homework/hw_weather_service/history"
-	"github.com/rodkevich/go-course/homework/hw_weather_service/weather/types"
+	"github.com/rodkevich/go-course/homework/hw_weather_service/history"
+	"github.com/rodkevich/go-course/homework/hw_weather_service/history/types"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,27 +15,28 @@ const serviceName = "history_service_001"
 
 var (
 	historyPort = os.Getenv("HISTORYPORT")
-	history     *historyService.Client
+	esClient    *history.Client
 )
 
 func init() {
-	history = historyService.NewEsClient(serviceName)
+	esClient = history.NewEsClient(serviceName)
 }
 
 func setupRouter() (engine *gin.Engine) {
 	engine = gin.Default()
 
+	// waiting for "Basic Z29waGVyOmhpc3RvcnlTZXJ2aWNl"
 	authorized := engine.Group("/", gin.BasicAuth(gin.Accounts{
-		"gopher": "historyService", // "Basic Z29waGVyOmhpc3RvcnlTZXJ2aWNl"
+		"gopher": "historyService",
 	}))
 
 	authorized.POST("/logs/create", func(c *gin.Context) {
 		var req types.LogPostRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "request doesn't match LogPostRequest - prototype "})
 			return
 		}
-		rtn, err := history.Save(req.Title)
+		rtn, err := esClient.Save(serviceName, req.String())
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error post logs": "Check your request"})
 			return
@@ -46,7 +47,7 @@ func setupRouter() (engine *gin.Engine) {
 
 	authorized.GET("/logs/:querySearch", func(c *gin.Context) {
 		querySearch := c.Params.ByName("querySearch")
-		rtn, err := history.SearchForEntries(querySearch)
+		rtn, err := esClient.SearchForEntries(querySearch)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"status": "400", "error": "Check your request"})
 			return
@@ -59,7 +60,6 @@ func setupRouter() (engine *gin.Engine) {
 }
 
 func main() {
-	// port = "9091"
 	r := setupRouter()
 	err := r.Run(":" + historyPort)
 	if err != nil {

@@ -1,8 +1,7 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -13,56 +12,59 @@ import (
 )
 
 var (
-	kibanaURL       = os.Getenv("KIBANAURL")
-	historyURL      = os.Getenv("HISTORYURL")
-	historyWriteURL = os.Getenv("HISTORYWRITEURL")
-	weatherURL      = os.Getenv("WEATHERURL")
+	kibanaURL   = os.Getenv("KIBANAURL")
+	historyURL  = os.Getenv("HISTORYURL")
+	weatherURL  = os.Getenv("WEATHERURL")
+	gatewayPort = os.Getenv("GATEWAYPORT")
 )
 
 func main() {
 
 	kibana, err := url.Parse(kibanaURL)
-	// kibana, err := url.Parse("http://hw_weather_service_kib01:5601")
-	// kibana, err := url.Parse("http://0.0.0.0:5601")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	logs, err := url.Parse(historyURL)
-	// logs, err := url.Parse("http://app-history:9091")
-	// logs, err := url.Parse("http://0.0.0.0:9091")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	weather, err := url.Parse(weatherURL)
-	// weather, err := url.Parse("http://app-weather:9090")
-	// weather, err := url.Parse("http://0.0.0.0:9090")
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	// this one requires no basic auth
 	proxyKibana := httputil.NewSingleHostReverseProxy(kibana)
 
-	// this one requires gopher : historyService
+	// this one requires basic auth - gopher : historyService
 	proxyLogs := httputil.NewSingleHostReverseProxy(logs)
-	proxyLogs.Director = func(req *http.Request) {
-		req.Header = map[string][]string{
-			"Authorization": {"Basic Z29waGVyOmhpc3RvcnlTZXJ2aWNl"}, // set auth
+
+	proxyLogs.Director = func(r *http.Request) {
+		request, err := httputil.DumpRequest(r, true)
+		if err != nil {
+			return
 		}
-		req.Host = logs.Host
-		req.URL.Scheme = logs.Scheme
-		req.URL.Host = logs.Host
+		fmt.Printf("%q", request)
+		// set auth
+		r.Header = map[string][]string{
+			"Authorization": {"Basic Z29waGVyOmhpc3RvcnlTZXJ2aWNl"}}
+		r.Host = logs.Host
+		r.URL.Scheme = logs.Scheme
+		r.URL.Host = logs.Host
 	}
 
-	// this one requires gopher : weatherService
+	// this one requires basic auth - gopher : weatherService
 	proxyWeather := httputil.NewSingleHostReverseProxy(weather)
+
 	proxyWeather.Director = func(req *http.Request) {
 		ID, _ := uuid.NewUUID()
 		req.Header = map[string][]string{
-			"traceID":       {ID.String()},                          // set trace ID
-			"Authorization": {"Basic Z29waGVyOmhpc3RvcnlTZXJ2aWNl"}, // set auth
-		}
+			// set trace ID
+			"traceID": {ID.String()},
+			// set auth
+			"Authorization": {"Basic Z29waGVyOmhpc3RvcnlTZXJ2aWNl"}}
 		req.Host = weather.Host
 		req.URL.Scheme = weather.Scheme
 		req.URL.Host = weather.Host
@@ -71,32 +73,16 @@ func main() {
 	http.Handle("/", proxyKibana)
 	http.Handle("/logs/", proxyLogs)
 	http.Handle("/city/", proxyWeather)
-	log.Fatal(http.ListenAndServe(":10000", nil))
-}
 
-func logToHistory(text string) (err error) {
-	body, err := json.Marshal(map[string]string{"title": text})
-	if err != nil {
-		return
-	}
-	resp, err := http.Post(
-		historyWriteURL,
-		"application/json",
-		bytes.NewBuffer(body),
-	)
-	if err != nil {
-		return
-	}
-	resp.Body.Close()
-	return
+	log.Fatal(http.ListenAndServe(":"+gatewayPort, nil))
 }
 
 /*
-Requesting with NO auth won't call 401 status code error
-because headers are added by gateway itself
 
-curl --location --request GET 'http://localhost:10000/logs/this%20will%20be%20logged'
-curl --location --request GET 'http://localhost:10000/city/Molodechno'
+Requesting through gateway with NO auth won't call 401 status code error
+because headers are added by itself
 
+curl -X GET 'http://localhost:10000/logs/this%20will%20be%20logged'
+curl -Xz` GET 'http://localhost:10000/city/Molodechno'
 
 */

@@ -46,7 +46,7 @@ services:
       - "9090:9090"
     networks:
       - hw_weather_service
-    depends_on: [ "app-history" ]
+    depends_on: [ "app-history",  "hw_weather_service_es01" ]
 
   hw_weather_service_es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0

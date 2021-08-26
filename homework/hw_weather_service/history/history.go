@@ -36,10 +36,11 @@ func NewEsClient(indexName string) *Client {
 			es2,
 			es3,
 			"http://localhost:9200",
+			"http://localhost:9300",
 		},
 		RetryOnStatus: []int{429, 502, 503, 504},
 		RetryBackoff: func(i int) time.Duration {
-			duration := time.Duration(math.Exp2(float64(i))) * time.Second
+			duration := time.Duration(math.Exp2(float64(i))) * 3 * time.Second
 			fmt.Printf("Attempt: %duration | Sleeping for %s...\n", i, duration)
 			return duration
 		},
@@ -47,24 +48,20 @@ func NewEsClient(indexName string) *Client {
 	}
 	es, err := elasticsearch.NewClient(cfg)
 	if err != nil {
-		log.Fatalf("Error creating the client: %s", err)
+		log.Printf("Error creating the client: %s", err)
+		return nil
 	}
 	return &Client{Client: es, IndexName: indexName}
 }
 
 // Save ...
-func (c *Client) Save(title string) (rtn map[string]interface{}, err error) {
-	// Compose request body
-	var b strings.Builder
-	b.WriteString(`{"title" : "`)
-	b.WriteString(title)
-	b.WriteString(`"}`)
-
+func (c *Client) Save(ind string, r string) (rtn map[string]interface{}, err error) {
 	// Create request object
 	req := esapi.IndexRequest{
-		Index:   c.IndexName,
-		Body:    strings.NewReader(b.String()),
+		Index:   ind,
+		Body:    strings.NewReader(r),
 		Refresh: "true",
+		Pretty:  true,
 	}
 
 	// Perform the request
@@ -94,42 +91,39 @@ func (c *Client) Save(title string) (rtn map[string]interface{}, err error) {
 
 // SearchForEntries ...
 func (c *Client) SearchForEntries(querySearch string) (strRes string, err error) {
-	// c.Delete("history", "history")
-	// c.Exists("history", "history")
-	// c.Search(es.Search.WithQuery("HELLOWORLD"))
-
 	// Compose request body
-	var b strings.Builder
-	b.WriteString(`
+	var body strings.Builder
+	body.WriteString(`
 	{
 	  "query": {
 		"multi_match" : {
 		  "query":    "` + querySearch + `",
-		  "fields": [ "_index", "title" ]
+		  "fields": [ "_index", "title" , "traceID" , "timestamp" , "body" ]
 		}
 	  }
 	}`)
-	log.Println(b.String())
+
 	var res *esapi.Response
 	res, err = c.Search(
 		c.Search.WithIndex(c.IndexName),
-		c.Search.WithBody(strings.NewReader(b.String())),
+		c.Search.WithBody(strings.NewReader(body.String())),
 		c.Search.WithTrackTotalHits(true),
 		c.Search.WithSize(10),
 		c.Search.WithPretty(),
 		c.Search.WithFilterPath("took", "hits.hits"),
 	)
-	log.Println(res)
 
 	strRes = res.String()
 	log.Println("\x1b[1mResponse:\x1b[0m", strRes)
 	if len(strRes) <= len("[200 OK] ") {
 		log.Printf("Response body is empty")
 	}
+
 	if err != nil {
 		log.Printf("Error:   %strRes", err)
-		return "", err
+		return
 	}
+
 	return
 }
 

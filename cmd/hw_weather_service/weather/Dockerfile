@@ -7,6 +7,8 @@ ENV CGO_ENABLED=0
 ENV GOOS=linux
 
 RUN go get -d -v github.com/gin-gonic/gin
+RUN go get -d -v github.com/elastic/go-elasticsearch
+
 RUN #dpkg-reconfigure ca-certificates
 
 WORKDIR /go/src/github.com/rodkevich/go-course
