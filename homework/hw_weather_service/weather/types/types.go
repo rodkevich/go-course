@@ -2,14 +2,14 @@ package types
 
 // TemperatureResponse ...
 type TemperatureResponse struct {
+	CityID        int     `json:"cityID"`
 	City          string  `json:"cityName"`
 	TimeRequested string  `json:"timeRequested"`
 	Temperature   float64 `json:"temp"`
-	CityID        int
 }
 
-// WeatherApiResponse ...
-type WeatherApiResponse struct {
+// OpenWeatherResponse ...
+type OpenWeatherResponse struct {
 	Coord struct {
 		Lon float64 `json:"lon"`
 		Lat float64 `json:"lat"`

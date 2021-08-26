@@ -1,93 +1,84 @@
 package weather
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
-	"github.com/rodkevich/go-course/homework/hw_weather_service/weather/types"
+	"github.com/gin-gonic/gin"
+
+	"github.com/rodkevich/go-course/homework/hw_weather_service/history/client"
+	"github.com/rodkevich/go-course/homework/hw_weather_service/history/types"
+	"github.com/rodkevich/go-course/homework/hw_weather_service/weather/openweather"
 )
+
+const serviceName = "weather_service"
 
 var (
-	req                 *http.Request
-	response            *http.Response
-	responseBody        []byte
-	openWeatherResponse types.WeatherApiResponse
+	openWeatherBaseURL = os.Getenv("OPENWEATHERBASEURL")
+	openWeatherAPIKey  = os.Getenv("OPENWEATHERAPIKEY")
+	clientES           *client.Client
+	clientOW           *openweather.Client
 )
 
-// Client ...
-type Client struct {
-	// HTTP client used to make requests.
-	*http.Client
-	// BaseURL   *url.URL
-	BaseURL   string
-	UserAgent string
-
-	apiKey string
-	units  string
-}
-
-// NewOpenWeatherClient ...
-func NewOpenWeatherClient(baseURL string, userAgent string, apiKey string, units string) *Client {
-	return &Client{Client: &http.Client{}, BaseURL: baseURL, UserAgent: userAgent, apiKey: apiKey, units: units}
-}
-
-// GetByCityName ...
-func (cl *Client) GetByCityName(cityName string) (cityWeather string, err error) {
-
-	method := "GET"
-	url := fmt.Sprintf(
-		"%s/data/2.5/weather?q=%s",
-		cl.BaseURL,
-		cityName,
+func init() {
+	clientOW = openweather.NewOpenWeatherClient(
+		openWeatherBaseURL,
+		serviceName,
+		openWeatherAPIKey,
+		"metric",
 	)
+	clientES = client.NewEsClient(serviceName)
+}
 
-	req, err = http.NewRequest(method, url, nil)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	que := req.URL.Query()
-	que.Add("que", cityName)
-	que.Add("appid", cl.apiKey)
-	que.Add("units", cl.units)
-	req.URL.RawQuery = que.Encode()
+// SetupService ...
+func SetupService() (engine *gin.Engine) {
+	engine = gin.Default()
 
-	response, err = cl.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer response.Body.Close()
-	responseBody, err = ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	err = json.Unmarshal(responseBody, &openWeatherResponse)
-	if err != nil {
-		return
-	}
+	engine.GET("/city/:name", func(c *gin.Context) {
+		var traceID = "Unknown user request"
+		if t := c.Request.Header.Get("traceID"); t != "" {
+			traceID = t
+		}
+		start := time.Now().UTC().Format("2006-01-02T15:04:05.999Z")
+		body := types.LogPostRequest{
+			Title:     serviceName,
+			TraceID:   traceID,
+			Timestamp: start,
+			Body:      "Very useful information about request from: " + c.Request.RemoteAddr,
+		}
+		_, err := clientES.SaveWithIndex(serviceName, body.String())
+		if err != nil {
+			log.Println("error 1st save /city/:name :", err)
+		}
 
-	type Rtn struct {
-		CityID        int
-		City          string
-		TimeRequested string
-		Temperature   float64
-	}
-	rtn := &Rtn{
-		CityID:        openWeatherResponse.Id,
-		City:          openWeatherResponse.Name,
-		TimeRequested: time.Now().UTC().Format("2006-01-02T15:04:05.999Z"),
-		Temperature:   openWeatherResponse.Main.Temp,
-	}
-	out, err := json.Marshal(rtn)
-	if err != nil {
-		panic(err)
-	}
-	cityWeather = string(out)
-	fmt.Println(cityWeather)
-	return
+		// get weather
+		cityName := c.Param("name")
+		city, err := clientOW.GetByCityName(cityName)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error get city": "such is life"})
+		}
+
+		// log again
+		finish := time.Now().UTC().Format("2006-01-02T15:04:05.999Z")
+		body = types.LogPostRequest{
+			Title:     serviceName,
+			TraceID:   traceID,
+			Timestamp: finish,
+			Body:      city,
+		}
+		_, err = clientES.SaveWithIndex(serviceName, body.String())
+		if err != nil {
+			log.Println("error 2nd save /city/:name :", err)
+			return
+		}
+		log.Printf("saved data about: %v start: %v, finish: %v", traceID, start, finish)
+
+		// return result
+		c.Header("Content-Type", "application/json")
+		c.String(http.StatusOK, city)
+	},
+	)
+	return engine
 }

@@ -9,7 +9,6 @@ ENV GOOS=linux
 RUN go get -d -v github.com/gin-gonic/gin
 RUN go get -d -v github.com/elastic/go-elasticsearch
 
-RUN #dpkg-reconfigure ca-certificates
 
 WORKDIR /go/src/github.com/rodkevich/go-course
 COPY . .
@@ -22,7 +21,6 @@ FROM scratch
 LABEL maintainer="ivan.rodkevich/weather"
 
 COPY --from=builder /go/src/github.com/rodkevich/go-course/cmd/hw_weather_service/weather .
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 EXPOSE 9090
 

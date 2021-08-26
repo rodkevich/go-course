@@ -78,11 +78,24 @@ func main() {
 }
 
 /*
-
 Requesting through gateway with NO auth won't call 401 status code error
 because headers are added by itself
 
-curl -X GET 'http://localhost:10000/logs/this%20will%20be%20logged'
-curl -Xz` GET 'http://localhost:10000/city/Molodechno'
+to log smth:
+curl -X POST 'http://localhost:10000/logs/create' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "title": "this is something",
+    "traceID": "17d9eeae-0692-11ec-b323-0242ac180008",
+    "timestamp": "2021-08-26T17:12:15.425Z",
+    "body": "that will be logged"
+}'
 
+to search logs:
+curl -X GET 'http://localhost:10000/logs/this%20will%20be%20logged'
+curl -X GET 'http://localhost:10000/logs/17d9eeae-0692-11ec-b323-0242ac180008'
+
+to get weather or 9090 it isn't protected:
+curl -X GET 'http://localhost:10000/city/Chicago'
+then curl for logs
 */
