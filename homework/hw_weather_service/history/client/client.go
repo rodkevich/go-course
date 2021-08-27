@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -73,7 +74,7 @@ func (c *Client) SaveWithIndex(ind string, r string) (rtn *map[string]interface{
 
 	if res.IsError() {
 		log.Printf("error: history.client: error indexing document ID=%s", res.Status())
-		return
+		return nil, errors.New("error: history.client: error indexing document")
 	}
 	// Response into a map to be returned
 	if err := json.NewDecoder(res.Body).Decode(&rtn); err == nil {
@@ -81,7 +82,7 @@ func (c *Client) SaveWithIndex(ind string, r string) (rtn *map[string]interface{
 		log.Printf(
 			"[%s] %s",
 			res.Status(),
-			ind+": history recodrd created",
+			ind+": history record created",
 		)
 	}
 	return
