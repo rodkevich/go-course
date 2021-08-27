@@ -41,7 +41,7 @@ func NewEsClient(indexName string) *Client {
 		RetryOnStatus: []int{429, 502, 503, 504},
 		RetryBackoff: func(i int) time.Duration {
 			duration := time.Duration(math.Exp2(float64(i))) * 3 * time.Second
-			fmt.Printf("Attempt: %duration | Sleeping for %s...\n", i, duration)
+			fmt.Printf("Attempt: %v duration | Sleeping for %s...\n", i, duration)
 			return duration
 		},
 		Logger: &estransport.JSONLogger{Output: os.Stdout},
@@ -67,12 +67,12 @@ func (c *Client) SaveWithIndex(ind string, r string) (rtn *map[string]interface{
 	// Perform the request
 	res, err := req.Do(context.Background(), c)
 	if err != nil {
-		log.Fatalf("Error getting response: %s", err)
+		log.Printf("error: getting response for SaveWithIndex: %s", err)
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
-		log.Printf("[%s] Error indexing document ID=%d", res.Status())
+		log.Printf("error: history.client: error indexing document ID=%s", res.Status())
 	} else {
 		// Response into a map to be returned
 		if err := json.NewDecoder(res.Body).Decode(&rtn); err != nil {
@@ -86,7 +86,7 @@ func (c *Client) SaveWithIndex(ind string, r string) (rtn *map[string]interface{
 			)
 		}
 	}
-	return
+	return rtn, nil
 }
 
 // SearchForEntries ...
@@ -111,16 +111,14 @@ func (c *Client) SearchForEntries(querySearch string) (entries string, err error
 		c.Search.WithPretty(),
 		c.Search.WithFilterPath("took", "hits.hits"),
 	)
+	if err != nil {
+		log.Printf("error: %entries", err)
+	}
 
 	entries = res.String()
-	log.Println("\x1b[1mResponse:\x1b[0m", entries)
 	if len(entries) <= len("[200 OK] ") {
 		log.Printf("Response body is empty")
 	}
 
-	if err != nil {
-		log.Printf("Error:   %entries", err)
-		return
-	}
-	return
+	return entries, nil
 }
