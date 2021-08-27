@@ -73,20 +73,18 @@ func (c *Client) SaveWithIndex(ind string, r string) (rtn *map[string]interface{
 
 	if res.IsError() {
 		log.Printf("error: history.client: error indexing document ID=%s", res.Status())
-	} else {
-		// Response into a map to be returned
-		if err := json.NewDecoder(res.Body).Decode(&rtn); err != nil {
-			log.Printf("error: history.client: json.NewDecoder(res.Body): %s", err)
-		} else {
-			// Log response status
-			log.Printf(
-				"[%s] %s",
-				res.Status(),
-				ind+": history recodrd created",
-			)
-		}
+		return
 	}
-	return rtn, nil
+	// Response into a map to be returned
+	if err := json.NewDecoder(res.Body).Decode(&rtn); err == nil {
+		// Log response status
+		log.Printf(
+			"[%s] %s",
+			res.Status(),
+			ind+": history recodrd created",
+		)
+	}
+	return
 }
 
 // SearchForEntries ...
