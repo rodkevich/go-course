@@ -1,0 +1,156 @@
+version: "3"
+
+services:
+  app-gateway:
+    build:
+      context: ../..
+      dockerfile: cmd/hw_weather_service/gateway/Dockerfile
+    container_name: app-gateway
+    hostname: app-gateway
+    env_file:
+      - ./config/.env.dev
+    ports:
+      - "10000:10000"
+    networks:
+      - hw_weather_service
+    depends_on: [ "app-weather" ]
+    links:
+      - app-history
+      - app-weather
+      - hw_weather_service_kib01
+      - hw_weather_service_es01
+
+  app-history:
+    build:
+      context: ../..
+      dockerfile: cmd/hw_weather_service/history/Dockerfile
+    container_name: app-history
+    hostname: app-history
+    env_file:
+      - ./config/.env.dev
+    ports:
+      - "9091:9091"
+    networks:
+      - hw_weather_service
+    depends_on: [ "hw_weather_service_kib01" ]
+
+  app-weather:
+    build:
+      context: ../..
+      dockerfile: cmd/hw_weather_service/weather/Dockerfile
+    container_name: app-weather
+    hostname: app-weather
+    env_file:
+      - ./config/.env.dev
+    ports:
+      - "9090:9090"
+    networks:
+      - hw_weather_service
+    depends_on: [ "app-history",  "hw_weather_service_es01" ,  "hw_weather_service_kib01" ]
+
+  hw_weather_service_es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    container_name: hw_weather_service_es01
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory:
+            3000M
+    environment:
+      - node.name=hw_weather_service_es01
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=hw_weather_service_es02,hw_weather_service_es03
+      - cluster.initial_master_nodes=hw_weather_service_es01,hw_weather_service_es02,hw_weather_service_es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - hw_weather_service
+
+  hw_weather_service_es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    container_name: hw_weather_service_es02
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory:
+            3000M
+    environment:
+      - node.name=hw_weather_service_es02
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=hw_weather_service_es01,hw_weather_service_es03
+      - cluster.initial_master_nodes=hw_weather_service_es01,hw_weather_service_es02,hw_weather_service_es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data02:/usr/share/elasticsearch/data
+    networks:
+      - hw_weather_service
+
+  hw_weather_service_es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    container_name: hw_weather_service_es03
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory:
+            3000M
+    environment:
+      - node.name=hw_weather_service_es03
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=hw_weather_service_es01,hw_weather_service_es02
+      - cluster.initial_master_nodes=hw_weather_service_es01,hw_weather_service_es02,hw_weather_service_es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data03:/usr/share/elasticsearch/data
+    networks:
+      - hw_weather_service
+
+  hw_weather_service_kib01:
+    image: docker.elastic.co/kibana/kibana:7.14.0
+    container_name: hw_weather_service_kib01
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory:
+            4000M
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://hw_weather_service_es01:9200
+      ELASTICSEARCH_HOSTS: '["http://hw_weather_service_es01:9200","http://hw_weather_service_es02:9200","http://hw_weather_service_es03:9200"]'
+    networks:
+      - hw_weather_service
+    depends_on: [ "hw_weather_service_es01", "hw_weather_service_es02", "hw_weather_service_es03" ]
+
+volumes:
+  data01:
+    driver: local
+  data02:
+    driver: local
+  data03:
+    driver: local
+
+networks:
+  hw_weather_service:
+    driver: bridge

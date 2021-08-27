@@ -1,0 +1,3 @@
+# you need to have this settings to run ELK stack with no errors:
+
+sudo sysctl -w vm.max_map_count=262144
